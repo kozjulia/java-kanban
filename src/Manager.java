@@ -2,15 +2,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Manager {
-    int nextUin = 0; // счётчик по сквозной нумерации сущностей
-    public HashMap<Integer, Task> mapTask = new HashMap<>(); // таблица задач
-    public HashMap<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
-    public HashMap<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
+    private int nextUin = 0; // счётчик по сквозной нумерации сущностей
+    private HashMap<Integer, Task> mapTask = new HashMap<>(); // таблица задач
+    private HashMap<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
+    private HashMap<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
 
     public Manager() {
     }
 
-    int generateUin() {
+    private int generateUin() {
         return ++nextUin;
     }
 
@@ -65,6 +65,7 @@ public class Manager {
     public void deleteAllSubtask() { // удаление всех задач
         mapSubtask.clear();
         for (Epic epic : mapEpic.values()) {
+            updateEpic(epic);
             updateStatusEpic(epic);
         }
     }
@@ -81,12 +82,15 @@ public class Manager {
         Subtask subtask = new Subtask(title, description, status, uinEpic);
         subtask.setUin(generateUin());
         mapSubtask.put(subtask.getUin(), subtask);
+        // записываем новое уин подзадачи в эпик
+        updateEpic(getEpicByUin(subtask.getUinEpic()));
         updateStatusEpic(getEpicByUin(subtask.getUinEpic()));
     }
 
     public void updateSubtask(Subtask subtask) { // обновление
         if (subtask != null) {
             mapSubtask.put(subtask.getUin(), subtask);
+            updateEpic(getEpicByUin(subtask.getUinEpic()));
             updateStatusEpic(getEpicByUin(subtask.getUinEpic()));
         }
     }
@@ -98,6 +102,7 @@ public class Manager {
             mapSubtask.remove(uin);
         }
         if (mapEpic.containsValue(epic)) {
+            updateEpic(epic);
             updateStatusEpic(epic);
         }
     }
@@ -133,6 +138,11 @@ public class Manager {
 
     public void updateEpic(Epic epic) { // обновление
         if (epic != null) {
+            ArrayList<Integer> uinSubtasks = new ArrayList<>(); // обновляем список подзадач
+            for (Subtask subtask : getListSubtaskByEpic(epic)) {
+                uinSubtasks.add(subtask.getUin());
+            }
+            epic.setUinSubtask(uinSubtasks);
             mapEpic.put(epic.getUin(), epic);
         }
     }
@@ -174,6 +184,7 @@ public class Manager {
         subtask.setStatus(status);
         updateSubtask(subtask);
         if (mapEpic.containsValue(subtask.getUinEpic())) {
+            updateEpic(getEpicByUin(subtask.getUinEpic()));
             updateStatusEpic(getEpicByUin(subtask.getUinEpic()));
         }
     }
