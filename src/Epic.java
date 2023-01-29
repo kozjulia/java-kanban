@@ -1,18 +1,19 @@
+import java.util.List;
 import java.util.ArrayList;
 
 // эпик, состоит из подзадач
 public class Epic extends Task {
-    private ArrayList<Integer> uinSubtask = new ArrayList<>(); // уины подзадач эпика
+    private List<Integer> uinSubtask = new ArrayList<>(); // уины подзадач эпика
 
-    public Epic(String title, String description, String status) {
+    public Epic(String title, String description, StatusTask status) {
         super(title, description, status);
     }
 
-    public ArrayList<Integer> getUinSubtask() {
+    public List<Integer> getUinSubtask() {
         return uinSubtask;
     }
 
-    public void setUinSubtask(ArrayList<Integer> uinSubtask) {
+    public void setUinSubtask(List<Integer> uinSubtask) {
         this.uinSubtask = uinSubtask;
     }
 
@@ -22,7 +23,7 @@ public class Epic extends Task {
                 "title='" + super.getTitle() + '\'' +
                 ", description='" + super.getDescription() + '\'' +
                 ", uin=" + super.getUin() +
-                ", status='" + super.getStatus() + '\'' +
+                ", status='" + super.getStatusTask() + '\'' +
                 ", uinSubtask.size()='" + uinSubtask.size() + '\'' +
                 '}';
     }

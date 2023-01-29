@@ -1,52 +1,59 @@
+import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
 
-public class Manager {
+public class InMemoryTaskManager implements TaskManager {
     private int nextUin = 0; // счётчик по сквозной нумерации сущностей
-    private HashMap<Integer, Task> mapTask = new HashMap<>(); // таблица задач
-    private HashMap<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
-    private HashMap<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
-
-    public Manager() {
-    }
+    private Map<Integer, Task> mapTask = new HashMap<>(); // таблица задач
+    private Map<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
+    private Map<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
+    public HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int generateUin() {
         return ++nextUin;
     }
 
     // Методы для класса Task
-    public ArrayList<Task> getAllTask() { // получение списка всех задач
-        ArrayList<Task> listTask = new ArrayList<>();
+    @Override
+    public List<Task> getAllTask() { // получение списка всех задач
+        List<Task> listTask = new ArrayList<>();
         for (Task task : mapTask.values()) {
             listTask.add(task);
         }
         return listTask;
     }
 
+    @Override
     public void deleteAllTask() { // удаление всех задач
         mapTask.clear();
     }
 
-    public Task getTaskByUin(int uin) { // получение по идентификатору
+    @Override
+    public Task getTask(int uin) { // получение по идентификатору
         if (mapTask.containsKey(uin)) {
+            historyManager.addHistory(mapTask.get(uin));
             return mapTask.get(uin);
         } else {
             return null;
         }
     }
 
-    public void createTask(String title, String description, String status) { // создание
+    @Override
+    public void createTask(String title, String description, StatusTask status) { // создание
         Task task = new Task(title, description, status);
         task.setUin(generateUin());
         mapTask.put(task.getUin(), task);
     }
 
+    @Override
     public void updateTask(Task task) { // обновление
         if (task != null) {
             mapTask.put(task.getUin(), task);
         }
     }
 
+    @Override
     public void deleteTask(int uin) { // удаление по идентификатору
         if (mapTask.containsKey(uin)) {
             mapTask.remove(uin);
@@ -54,14 +61,16 @@ public class Manager {
     }
 
     // Методы для класса Subtask
-    public ArrayList<Subtask> getAllSubtask() { // получение списка всех задач
-        ArrayList<Subtask> listSubtask = new ArrayList<>();
+    @Override
+    public List<Subtask> getAllSubtask() { // получение списка всех задач
+        List<Subtask> listSubtask = new ArrayList<>();
         for (Subtask subtask : mapSubtask.values()) {
             listSubtask.add(subtask);
         }
         return listSubtask;
     }
 
+    @Override
     public void deleteAllSubtask() { // удаление всех задач
         mapSubtask.clear();
         for (Epic epic : mapEpic.values()) {
@@ -70,35 +79,40 @@ public class Manager {
         }
     }
 
-    public Subtask getSubtaskByUin(int uin) { // получение по идентификатору
+    @Override
+    public Subtask getSubtask(int uin) { // получение по идентификатору
         if (mapSubtask.containsKey(uin)) {
+            historyManager.addHistory(mapSubtask.get(uin));
             return mapSubtask.get(uin);
         } else {
             return null;
         }
     }
 
-    public void createSubtask(String title, String description, String status, int uinEpic) { // создание
+    @Override
+    public void createSubtask(String title, String description, StatusTask status, int uinEpic) { // создание
         Subtask subtask = new Subtask(title, description, status, uinEpic);
         subtask.setUin(generateUin());
         mapSubtask.put(subtask.getUin(), subtask);
         // записываем новое уин подзадачи в эпик
-        updateEpic(getEpicByUin(subtask.getUinEpic()));
-        updateStatusEpic(getEpicByUin(subtask.getUinEpic()));
+        updateEpic(getEpic(subtask.getUinEpic()));
+        updateStatusEpic(getEpic(subtask.getUinEpic()));
     }
 
+    @Override
     public void updateSubtask(Subtask subtask) { // обновление
         if (subtask != null) {
             mapSubtask.put(subtask.getUin(), subtask);
-            updateEpic(getEpicByUin(subtask.getUinEpic()));
-            updateStatusEpic(getEpicByUin(subtask.getUinEpic()));
+            updateEpic(getEpic(subtask.getUinEpic()));
+            updateStatusEpic(getEpic(subtask.getUinEpic()));
         }
     }
 
+    @Override
     public void deleteSubtask(int uin) { // удаление по идентификатору
         Epic epic = null;
         if (mapSubtask.containsKey(uin)) {
-            epic = getEpicByUin(mapSubtask.get(uin).getUinEpic());
+            epic = getEpic(mapSubtask.get(uin).getUinEpic());
             mapSubtask.remove(uin);
         }
         if (mapEpic.containsValue(epic)) {
@@ -108,34 +122,40 @@ public class Manager {
     }
 
     // Методы для класса Epic
-    public ArrayList<Epic> getAllEpic() { // получение списка всех задач
-        ArrayList<Epic> listEpic = new ArrayList<>();
+    @Override
+    public List<Epic> getAllEpic() { // получение списка всех задач
+        List<Epic> listEpic = new ArrayList<>();
         for (Epic epic : mapEpic.values()) {
             listEpic.add(epic);
         }
         return listEpic;
     }
 
+    @Override
     public void deleteAllEpic() { // удаление всех задач
         mapEpic.clear();
         mapSubtask.clear();
     }
 
-    public Epic getEpicByUin(int uin) { // получение по идентификатору
+    @Override
+    public Epic getEpic(int uin) { // получение по идентификатору
         if (mapEpic.containsKey(uin)) {
+            historyManager.addHistory(mapEpic.get(uin));
             return mapEpic.get(uin);
         } else {
             return null;
         }
     }
 
-    public int createEpic(String title, String description, String status) { // создание
+    @Override
+    public int createEpic(String title, String description, StatusTask status) { // создание
         Epic epic = new Epic(title, description, status);
         epic.setUin(generateUin());
         mapEpic.put(epic.getUin(), epic);
         return epic.getUin();
     }
 
+    @Override
     public void updateEpic(Epic epic) { // обновление
         if (epic != null) {
             ArrayList<Integer> uinSubtasks = new ArrayList<>(); // обновляем список подзадач
@@ -147,8 +167,9 @@ public class Manager {
         }
     }
 
+    @Override
     public void deleteEpic(int uin) { // удаление по идентификатору
-        ArrayList<Subtask> listSubtask = new ArrayList<>();
+        List<Subtask> listSubtask = new ArrayList<>();
         if (mapEpic.containsKey(uin)) {
             listSubtask = getListSubtaskByEpic(mapEpic.get(uin));
             mapEpic.remove(uin);
@@ -159,8 +180,8 @@ public class Manager {
     }
 
     // получение списка всех подзадач определённого эпика
-    public ArrayList<Subtask> getListSubtaskByEpic(Epic epic) {
-        ArrayList<Subtask> listSubtask = new ArrayList<>();
+    public List<Subtask> getListSubtaskByEpic(Epic epic) {
+        List<Subtask> listSubtask = new ArrayList<>();
         for (Subtask subtask : mapSubtask.values()) {
             if (subtask.getUinEpic() == epic.getUin()) {
                 listSubtask.add(subtask);
@@ -170,57 +191,66 @@ public class Manager {
     }
 
     // управление статусами задач
-    public void updateStatusTask(Task task, String status) {
+    @Override
+    public void updateStatusTask(Task task, StatusTask status) {
         if (task != null) {
-            task.setStatus(status);
+            task.setStatusTask(status);
             updateTask(task);
         }
     }
 
-    public void updateStatusSubtask(Subtask subtask, String status) {
+    @Override
+    public void updateStatusSubtask(Subtask subtask, StatusTask status) {
         if (subtask == null) {
             return;
         }
-        subtask.setStatus(status);
+        subtask.setStatusTask(status);
         updateSubtask(subtask);
         if (mapEpic.containsValue(subtask.getUinEpic())) {
-            updateEpic(getEpicByUin(subtask.getUinEpic()));
-            updateStatusEpic(getEpicByUin(subtask.getUinEpic()));
+            updateEpic(getEpic(subtask.getUinEpic()));
+            updateStatusEpic(getEpic(subtask.getUinEpic()));
         }
     }
 
+    @Override
     public void updateStatusEpic(Epic epic) {
         if (epic == null) {
             return;
         }
-        ArrayList<Subtask> listSubtask = new ArrayList<>();
+        List<Subtask> listSubtask = new ArrayList<>();
         listSubtask = getListSubtaskByEpic(epic);
         boolean change = false; // отслеживаем изменен ли был статус эпика
         // если у эпика нет подзадач, то статус должен быть NEW
         if (listSubtask.size() == 0) {
-            epic.setStatus("NEW");
+            epic.setStatusTask(StatusTask.NEW);
             change = true;
-        } else if (checkStatusSubtask(listSubtask, "NEW")) {
-            epic.setStatus("NEW");
+        } else if (checkStatusSubtask(listSubtask, StatusTask.NEW)) {
+            epic.setStatusTask(StatusTask.NEW);
             change = true;
-        } else if (checkStatusSubtask(listSubtask, "DONE")) {
-            epic.setStatus("DONE");
+        } else if (checkStatusSubtask(listSubtask, StatusTask.DONE)) {
+            epic.setStatusTask(StatusTask.DONE);
             change = true;
         }
         if (!change) {
-            epic.setStatus("IN_PROGRESS");
+            epic.setStatusTask(StatusTask.IN_PROGRESS);
         }
         updateEpic(epic);
     }
 
     // проверка статуса подзадач эпика - все новые или всё сделано
-    public boolean checkStatusSubtask(ArrayList<Subtask> listSubtask, String checkStatus) {
+    public boolean checkStatusSubtask(List<Subtask> listSubtask, StatusTask checkStatus) {
         boolean check = true;
         for (Subtask subtask : listSubtask) {
-            if (subtask.getStatus() != checkStatus) {
+            if (!subtask.getStatusTask().equals(checkStatus)) {
                 check = false;
             }
         }
         return check;
+    }
+
+    // история просмотра задач
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 }

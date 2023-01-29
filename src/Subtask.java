@@ -2,7 +2,7 @@
 public class Subtask extends Task {
     private int uinEpic; // уин эпика для подзадачи
 
-    public Subtask(String title, String description, String status, int uinEpic) {
+    public Subtask(String title, String description, StatusTask status, int uinEpic) {
         super(title, description, status);
         this.uinEpic = uinEpic;
     }
@@ -21,7 +21,7 @@ public class Subtask extends Task {
                 "title='" + super.getTitle() + '\'' +
                 ", description='" + super.getDescription() + '\'' +
                 ", uin=" + super.getUin() +
-                ", status='" + super.getStatus() + '\'' +
+                ", status='" + super.getStatusTask() + '\'' +
                 ", uinEpic='" + uinEpic + '\'' +
                 '}';
     }

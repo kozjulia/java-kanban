@@ -3,13 +3,9 @@ public class Task {
     private String title; // название
     private String description; // описание
     private int uin; // Уникальный Идентификационный Номер задачи
-    private String status; // статус, отображающий прогресс задачи
-        /* статус может быть 3 видов -
-        NEW — задача только создана, но к её выполнению ещё не приступили
-        IN_PROGRESS — над задачей ведётся работа
-        DONE — задача выполнена */
+    private StatusTask status; // статус, отображающий прогресс задачи
 
-    public Task(String title, String description, String status) {
+    public Task(String title, String description, StatusTask status) {
         this.title = title;
         this.description = description;
         this.status = status;
@@ -39,11 +35,11 @@ public class Task {
         this.uin = uin;
     }
 
-    public String getStatus() {
+    public StatusTask getStatusTask() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatusTask(StatusTask status) {
         this.status = status;
     }
 
