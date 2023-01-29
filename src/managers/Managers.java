@@ -1,8 +1,10 @@
+package managers;
+
 // утилитарный класс-менеджер
 public class Managers {
 
     public static TaskManager getDefault() {
-       return new InMemoryTaskManager();
+        return new InMemoryTaskManager();
     }
 
     public static HistoryManager getDefaultHistory() {

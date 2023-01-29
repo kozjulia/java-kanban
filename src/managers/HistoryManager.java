@@ -1,3 +1,7 @@
+package managers;
+
+import tasks.Task;
+
 import java.util.List;
 
 // интерфейс для управления историей просмотров

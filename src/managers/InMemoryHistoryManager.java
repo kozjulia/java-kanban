@@ -1,5 +1,11 @@
+package managers;
+
+import managers.HistoryManager;
+import tasks.Task;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 public class InMemoryHistoryManager implements HistoryManager {
     // история просмотров задач, не более 10 элементов
@@ -8,7 +14,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        return historyList;
+        List reverse = new ArrayList();
+        reverse.addAll(historyList);  // передаем историю, начав с последней просмотренной задачи
+        Collections.reverse(reverse);
+        return reverse;
     }
 
     @Override

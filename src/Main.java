@@ -1,3 +1,10 @@
+import managers.Managers;
+import managers.TaskManager;
+import tasks.Epic;
+import tasks.StatusTask;
+import tasks.Subtask;
+import tasks.Task;
+
 // Трекер задач (бэкенд)
 public class Main {
 
@@ -28,21 +35,21 @@ public class Main {
     }
 
     private static void testSprint(TaskManager taskManager) {
-        taskManager.createTask("Вымыть пол", "со средством", StatusTask.NEW);
-        taskManager.createTask("Поиграть", "в настольные игры", StatusTask.IN_PROGRESS);
-        int uinEpic;
-        uinEpic = taskManager.createEpic("Сделать покупки", "продукты", StatusTask.NEW);
-        taskManager.createSubtask("Яблоки", "красные", StatusTask.DONE, uinEpic);
-        taskManager.createSubtask("Творог", "200 гр.", StatusTask.DONE, uinEpic);
-        uinEpic = taskManager.createEpic("Подготовиться к д/р", "детское", StatusTask.IN_PROGRESS);
-        taskManager.createSubtask("Купить шарики", "белые", StatusTask.NEW, uinEpic);
+        taskManager.createTask("Вымыть пол", "со средством");
+        taskManager.createTask("Поиграть", "в настольные игры");
+        int idEpic;
+        idEpic = taskManager.createEpic("Сделать покупки", "продукты");
+        taskManager.createSubtask("Яблоки", "красные", idEpic);
+        taskManager.createSubtask("Творог", "200 гр.", idEpic);
+        idEpic = taskManager.createEpic("Подготовиться к д/р", "детское");
+        taskManager.createSubtask("Купить шарики", "белые", idEpic);
         printAllTasks(taskManager);
         printHistory(taskManager);
 
         taskManager.updateStatusTask(taskManager.getTask(1), StatusTask.IN_PROGRESS);
-        taskManager.updateStatusSubtask(taskManager.getSubtask(1), StatusTask.NEW); // нет такой подзадачи
-        taskManager.updateStatusSubtask(taskManager.getSubtask(4), StatusTask.NEW);
-        taskManager.updateStatusSubtask(taskManager.getSubtask(7), StatusTask.IN_PROGRESS);
+        taskManager.updateStatusSubtask(taskManager.getSubtask(1), StatusTask.DONE); // нет такой подзадачи
+        taskManager.updateStatusSubtask(taskManager.getSubtask(4), StatusTask.DONE);
+        taskManager.updateStatusSubtask(taskManager.getSubtask(7), StatusTask.DONE);
         printAllTasks(taskManager);
         printHistory(taskManager);
 

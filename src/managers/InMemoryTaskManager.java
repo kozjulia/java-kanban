@@ -1,20 +1,28 @@
+package managers;
+
+import managers.HistoryManager;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+import tasks.StatusTask;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
 public class InMemoryTaskManager implements TaskManager {
-    private int nextUin = 0; // счётчик по сквозной нумерации сущностей
+    private int nextId = 0; // счётчик по сквозной нумерации сущностей
     private Map<Integer, Task> mapTask = new HashMap<>(); // таблица задач
     private Map<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
     private Map<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
     public HistoryManager historyManager = Managers.getDefaultHistory();
 
-    private int generateUin() {
-        return ++nextUin;
+    private int generateId() {
+        return ++nextId;
     }
 
-    // Методы для класса Task
+    // Методы для класса tasks.Task
     @Override
     public List<Task> getAllTask() { // получение списка всех задач
         List<Task> listTask = new ArrayList<>();
@@ -30,37 +38,37 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getTask(int uin) { // получение по идентификатору
-        if (mapTask.containsKey(uin)) {
-            historyManager.addHistory(mapTask.get(uin));
-            return mapTask.get(uin);
+    public Task getTask(int id) { // получение по идентификатору
+        if (mapTask.containsKey(id)) {
+            historyManager.addHistory(mapTask.get(id));
+            return mapTask.get(id);
         } else {
             return null;
         }
     }
 
     @Override
-    public void createTask(String title, String description, StatusTask status) { // создание
-        Task task = new Task(title, description, status);
-        task.setUin(generateUin());
-        mapTask.put(task.getUin(), task);
+    public void createTask(String title, String description) { // создание
+        Task task = new Task(title, description);
+        task.setId(generateId());
+        mapTask.put(task.getId(), task);
     }
 
     @Override
     public void updateTask(Task task) { // обновление
         if (task != null) {
-            mapTask.put(task.getUin(), task);
+            mapTask.put(task.getId(), task);
         }
     }
 
     @Override
-    public void deleteTask(int uin) { // удаление по идентификатору
-        if (mapTask.containsKey(uin)) {
-            mapTask.remove(uin);
+    public void deleteTask(int id) { // удаление по идентификатору
+        if (mapTask.containsKey(id)) {
+            mapTask.remove(id);
         }
     }
 
-    // Методы для класса Subtask
+    // Методы для класса tasks.Subtask
     @Override
     public List<Subtask> getAllSubtask() { // получение списка всех задач
         List<Subtask> listSubtask = new ArrayList<>();
@@ -80,40 +88,40 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask getSubtask(int uin) { // получение по идентификатору
-        if (mapSubtask.containsKey(uin)) {
-            historyManager.addHistory(mapSubtask.get(uin));
-            return mapSubtask.get(uin);
+    public Subtask getSubtask(int id) { // получение по идентификатору
+        if (mapSubtask.containsKey(id)) {
+            historyManager.addHistory(mapSubtask.get(id));
+            return mapSubtask.get(id);
         } else {
             return null;
         }
     }
 
     @Override
-    public void createSubtask(String title, String description, StatusTask status, int uinEpic) { // создание
-        Subtask subtask = new Subtask(title, description, status, uinEpic);
-        subtask.setUin(generateUin());
-        mapSubtask.put(subtask.getUin(), subtask);
+    public void createSubtask(String title, String description, int idEpic) { // создание
+        Subtask subtask = new Subtask(title, description, idEpic);
+        subtask.setId(generateId());
+        mapSubtask.put(subtask.getId(), subtask);
         // записываем новое уин подзадачи в эпик
-        updateEpic(getEpic(subtask.getUinEpic()));
-        updateStatusEpic(getEpic(subtask.getUinEpic()));
+        updateEpic(getEpic(subtask.getIdEpic()));
+        updateStatusEpic(getEpic(subtask.getIdEpic()));
     }
 
     @Override
     public void updateSubtask(Subtask subtask) { // обновление
         if (subtask != null) {
-            mapSubtask.put(subtask.getUin(), subtask);
-            updateEpic(getEpic(subtask.getUinEpic()));
-            updateStatusEpic(getEpic(subtask.getUinEpic()));
+            mapSubtask.put(subtask.getId(), subtask);
+            updateEpic(getEpic(subtask.getIdEpic()));
+            updateStatusEpic(getEpic(subtask.getIdEpic()));
         }
     }
 
     @Override
-    public void deleteSubtask(int uin) { // удаление по идентификатору
+    public void deleteSubtask(int id) { // удаление по идентификатору
         Epic epic = null;
-        if (mapSubtask.containsKey(uin)) {
-            epic = getEpic(mapSubtask.get(uin).getUinEpic());
-            mapSubtask.remove(uin);
+        if (mapSubtask.containsKey(id)) {
+            epic = getEpic(mapSubtask.get(id).getIdEpic());
+            mapSubtask.remove(id);
         }
         if (mapEpic.containsValue(epic)) {
             updateEpic(epic);
@@ -121,7 +129,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    // Методы для класса Epic
+    // Методы для класса tasks.Epic
     @Override
     public List<Epic> getAllEpic() { // получение списка всех задач
         List<Epic> listEpic = new ArrayList<>();
@@ -138,44 +146,44 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Epic getEpic(int uin) { // получение по идентификатору
-        if (mapEpic.containsKey(uin)) {
-            historyManager.addHistory(mapEpic.get(uin));
-            return mapEpic.get(uin);
+    public Epic getEpic(int id) { // получение по идентификатору
+        if (mapEpic.containsKey(id)) {
+            historyManager.addHistory(mapEpic.get(id));
+            return mapEpic.get(id);
         } else {
             return null;
         }
     }
 
     @Override
-    public int createEpic(String title, String description, StatusTask status) { // создание
-        Epic epic = new Epic(title, description, status);
-        epic.setUin(generateUin());
-        mapEpic.put(epic.getUin(), epic);
-        return epic.getUin();
+    public int createEpic(String title, String description) { // создание
+        Epic epic = new Epic(title, description);
+        epic.setId(generateId());
+        mapEpic.put(epic.getId(), epic);
+        return epic.getId();
     }
 
     @Override
     public void updateEpic(Epic epic) { // обновление
         if (epic != null) {
-            ArrayList<Integer> uinSubtasks = new ArrayList<>(); // обновляем список подзадач
+            ArrayList<Integer> idSubtasks = new ArrayList<>(); // обновляем список подзадач
             for (Subtask subtask : getListSubtaskByEpic(epic)) {
-                uinSubtasks.add(subtask.getUin());
+                idSubtasks.add(subtask.getId());
             }
-            epic.setUinSubtask(uinSubtasks);
-            mapEpic.put(epic.getUin(), epic);
+            epic.setIdSubtask(idSubtasks);
+            mapEpic.put(epic.getId(), epic);
         }
     }
 
     @Override
-    public void deleteEpic(int uin) { // удаление по идентификатору
+    public void deleteEpic(int id) { // удаление по идентификатору
         List<Subtask> listSubtask = new ArrayList<>();
-        if (mapEpic.containsKey(uin)) {
-            listSubtask = getListSubtaskByEpic(mapEpic.get(uin));
-            mapEpic.remove(uin);
+        if (mapEpic.containsKey(id)) {
+            listSubtask = getListSubtaskByEpic(mapEpic.get(id));
+            mapEpic.remove(id);
         }
         for (Subtask subtask : listSubtask) {
-            deleteSubtask(subtask.getUin());
+            deleteSubtask(subtask.getId());
         }
     }
 
@@ -183,7 +191,7 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Subtask> getListSubtaskByEpic(Epic epic) {
         List<Subtask> listSubtask = new ArrayList<>();
         for (Subtask subtask : mapSubtask.values()) {
-            if (subtask.getUinEpic() == epic.getUin()) {
+            if (subtask.getIdEpic() == epic.getId()) {
                 listSubtask.add(subtask);
             }
         }
@@ -206,9 +214,9 @@ public class InMemoryTaskManager implements TaskManager {
         }
         subtask.setStatusTask(status);
         updateSubtask(subtask);
-        if (mapEpic.containsValue(subtask.getUinEpic())) {
-            updateEpic(getEpic(subtask.getUinEpic()));
-            updateStatusEpic(getEpic(subtask.getUinEpic()));
+        if (mapEpic.containsValue(subtask.getIdEpic())) {
+            updateEpic(getEpic(subtask.getIdEpic()));
+            updateStatusEpic(getEpic(subtask.getIdEpic()));
         }
     }
 
