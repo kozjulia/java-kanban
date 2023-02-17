@@ -1,7 +1,5 @@
 package tasks;
 
-//import managers.InMemoryTaskManager;
-
 // класс отдельно стоящей задачи, родитель tasks.Subtask и tasks.Epic
 public class Task {
     private String title; // название
