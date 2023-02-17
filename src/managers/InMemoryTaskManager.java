@@ -1,6 +1,5 @@
 package managers;
 
-import managers.HistoryManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -13,9 +12,9 @@ import java.util.HashMap;
 
 public class InMemoryTaskManager implements TaskManager {
     private int nextId = 0; // счётчик по сквозной нумерации сущностей
-    private Map<Integer, Task> mapTask = new HashMap<>(); // таблица задач
-    private Map<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
-    private Map<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
+    private final Map<Integer, Task> mapTask = new HashMap<>(); // таблица задач
+    private final Map<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
+    private final Map<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
     public HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int generateId() {
@@ -34,13 +33,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTask() { // удаление всех задач
+        for (Integer id : mapTask.keySet()) {
+            historyManager.remove(id);
+        }
         mapTask.clear();
     }
 
     @Override
     public Task getTask(int id) { // получение по идентификатору
         if (mapTask.containsKey(id)) {
-            historyManager.addHistory(mapTask.get(id));
+            historyManager.add(mapTask.get(id));
             return mapTask.get(id);
         } else {
             return null;
@@ -65,6 +67,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTask(int id) { // удаление по идентификатору
         if (mapTask.containsKey(id)) {
             mapTask.remove(id);
+            historyManager.remove(id);
         }
     }
 
@@ -80,9 +83,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllSubtask() { // удаление всех задач
+        for (Integer id : mapSubtask.keySet()) {
+            historyManager.remove(id);
+        }
         mapSubtask.clear();
         for (Epic epic : mapEpic.values()) {
-            updateEpic(epic);
             updateStatusEpic(epic);
         }
     }
@@ -90,7 +95,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtask(int id) { // получение по идентификатору
         if (mapSubtask.containsKey(id)) {
-            historyManager.addHistory(mapSubtask.get(id));
+            historyManager.add(mapSubtask.get(id));
             return mapSubtask.get(id);
         } else {
             return null;
@@ -103,7 +108,6 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setId(generateId());
         mapSubtask.put(subtask.getId(), subtask);
         // записываем новое уин подзадачи в эпик
-        updateEpic(getEpic(subtask.getIdEpic()));
         updateStatusEpic(getEpic(subtask.getIdEpic()));
     }
 
@@ -111,7 +115,6 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubtask(Subtask subtask) { // обновление
         if (subtask != null) {
             mapSubtask.put(subtask.getId(), subtask);
-            updateEpic(getEpic(subtask.getIdEpic()));
             updateStatusEpic(getEpic(subtask.getIdEpic()));
         }
     }
@@ -122,9 +125,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (mapSubtask.containsKey(id)) {
             epic = getEpic(mapSubtask.get(id).getIdEpic());
             mapSubtask.remove(id);
+            historyManager.remove(id);
         }
         if (mapEpic.containsValue(epic)) {
-            updateEpic(epic);
             updateStatusEpic(epic);
         }
     }
@@ -141,14 +144,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllEpic() { // удаление всех задач
+        for (Integer id : mapEpic.keySet()) {
+            historyManager.remove(id);
+        }
         mapEpic.clear();
-        mapSubtask.clear();
+        deleteAllSubtask();
     }
 
     @Override
     public Epic getEpic(int id) { // получение по идентификатору
         if (mapEpic.containsKey(id)) {
-            historyManager.addHistory(mapEpic.get(id));
+            historyManager.add(mapEpic.get(id));
             return mapEpic.get(id);
         } else {
             return null;
@@ -181,6 +187,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (mapEpic.containsKey(id)) {
             listSubtask = getListSubtaskByEpic(mapEpic.get(id));
             mapEpic.remove(id);
+            historyManager.remove(id);
         }
         for (Subtask subtask : listSubtask) {
             deleteSubtask(subtask.getId());
@@ -215,7 +222,6 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setStatusTask(status);
         updateSubtask(subtask);
         if (mapEpic.containsValue(subtask.getIdEpic())) {
-            updateEpic(getEpic(subtask.getIdEpic()));
             updateStatusEpic(getEpic(subtask.getIdEpic()));
         }
     }

@@ -1,7 +1,6 @@
 import managers.Managers;
 import managers.TaskManager;
 import tasks.Epic;
-import tasks.StatusTask;
 import tasks.Subtask;
 import tasks.Task;
 
@@ -11,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         TaskManager taskManager = Managers.getDefault();
 
-        testSprint(taskManager);  // тестовые данные для ФЗ спринта
+        testSprint(taskManager);  // тестовые данные для ФЗ 5-го спринта
     }
 
     private static void printAllTasks(TaskManager taskManager) {
@@ -29,32 +28,42 @@ public class Main {
 
     private static void printHistory(TaskManager taskManager) {
         System.out.println("\nИстория просмотра: ");
+        if (taskManager.getHistory() == null) {
+            return;
+        }
         for (Task task : taskManager.getHistory()) {
             System.out.println(task);
         }
     }
 
     private static void testSprint(TaskManager taskManager) {
-        taskManager.createTask("Вымыть пол", "со средством");
+        taskManager.createTask("Покормить животных", "вкусным кормом");
         taskManager.createTask("Поиграть", "в настольные игры");
         int idEpic;
         idEpic = taskManager.createEpic("Сделать покупки", "продукты");
         taskManager.createSubtask("Яблоки", "красные", idEpic);
         taskManager.createSubtask("Творог", "200 гр.", idEpic);
-        idEpic = taskManager.createEpic("Подготовиться к д/р", "детское");
-        taskManager.createSubtask("Купить шарики", "белые", idEpic);
+        taskManager.createSubtask("Молоко", "2 литра", idEpic);
+        taskManager.createEpic("Подготовиться к д/р", "детское");
         printAllTasks(taskManager);
         printHistory(taskManager);
 
-        taskManager.updateStatusTask(taskManager.getTask(1), StatusTask.IN_PROGRESS);
-        taskManager.updateStatusSubtask(taskManager.getSubtask(1), StatusTask.DONE); // нет такой подзадачи
-        taskManager.updateStatusSubtask(taskManager.getSubtask(4), StatusTask.DONE);
-        taskManager.updateStatusSubtask(taskManager.getSubtask(7), StatusTask.DONE);
-        printAllTasks(taskManager);
+        taskManager.getTask(1);
+        taskManager.getSubtask(4);
+        taskManager.getEpic(3);
+        printHistory(taskManager);
+
+        taskManager.getEpic(3);
+        taskManager.getTask(2);
+        taskManager.getTask(1);
         printHistory(taskManager);
 
         taskManager.deleteTask(2);
-        taskManager.deleteSubtask(5);
+        taskManager.deleteEpic(7);
+        printAllTasks(taskManager);
+        printHistory(taskManager);
+
+        taskManager.deleteEpic(3);
         printAllTasks(taskManager);
         printHistory(taskManager);
     }
