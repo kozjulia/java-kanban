@@ -11,15 +11,11 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class InMemoryTaskManager implements TaskManager {
-    private int nextId = 0; // счётчик по сквозной нумерации сущностей
+
     private final Map<Integer, Task> mapTask = new HashMap<>(); // таблица задач
     private final Map<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
     private final Map<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
     public HistoryManager historyManager = Managers.getDefaultHistory();
-
-    private int generateId() {
-        return ++nextId;
-    }
 
     // Методы для класса tasks.Task
     @Override
@@ -52,7 +48,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void createTask(String title, String description) { // создание
         Task task = new Task(title, description);
-        task.setId(generateId());
         mapTask.put(task.getId(), task);
     }
 
@@ -105,7 +100,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void createSubtask(String title, String description, int idEpic) { // создание
         Subtask subtask = new Subtask(title, description, idEpic);
-        subtask.setId(generateId());
         mapSubtask.put(subtask.getId(), subtask);
         // записываем новое уин подзадачи в эпик
         updateStatusEpic(getEpic(subtask.getIdEpic()));
@@ -164,7 +158,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int createEpic(String title, String description) { // создание
         Epic epic = new Epic(title, description);
-        epic.setId(generateId());
         mapEpic.put(epic.getId(), epic);
         return epic.getId();
     }
@@ -252,7 +245,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // проверка статуса подзадач эпика - все новые или всё сделано
-    public boolean checkStatusSubtask(List<Subtask> listSubtask, StatusTask checkStatus) {
+    private boolean checkStatusSubtask(List<Subtask> listSubtask, StatusTask checkStatus) {
         boolean check = true;
         for (Subtask subtask : listSubtask) {
             if (!subtask.getStatusTask().equals(checkStatus)) {

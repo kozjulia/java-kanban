@@ -1,16 +1,25 @@
 package tasks;
 
+//import managers.InMemoryTaskManager;
+
 // класс отдельно стоящей задачи, родитель tasks.Subtask и tasks.Epic
 public class Task {
     private String title; // название
     private String description; // описание
     private int id; // Уникальный Идентификационный Номер задачи
+    private static int nextId = 0; // счётчик по сквозной нумерации сущностей
+
     private StatusTask status; // статус, отображающий прогресс задачи
 
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
         this.status = StatusTask.NEW;
+        this.id = generateId();
+    }
+
+    private int generateId() {
+        return ++nextId;
     }
 
     public String getTitle() {
