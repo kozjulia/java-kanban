@@ -2,38 +2,27 @@ package tasks;
 
 // класс отдельно стоящей задачи, родитель tasks.Subtask и tasks.Epic
 public class Task {
-    private String title; // название
-    private String description; // описание
     private int id; // Уникальный Идентификационный Номер задачи
+    private TypeTask type; // тип задачи
+    private String title; // название
+    private StatusTask status; // статус, отображающий прогресс задачи
+    private String description; // описание
     private static int nextId = 0; // счётчик по сквозной нумерации сущностей
 
-    private StatusTask status; // статус, отображающий прогресс задачи
+    public Task() {
+        this.type = TypeTask.TASK;
+    }
 
     public Task(String title, String description) {
-        this.title = title;
-        this.description = description;
-        this.status = StatusTask.NEW;
         this.id = generateId();
+        this.type = TypeTask.TASK;
+        this.title = title;
+        this.status = StatusTask.NEW;
+        this.description = description;
     }
 
     private int generateId() {
         return ++nextId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public int getId() {
@@ -44,6 +33,22 @@ public class Task {
         this.id = id;
     }
 
+    public TypeTask getType() {
+        return type;
+    }
+
+    public void setType(TypeTask type) {
+        this.type = type;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public StatusTask getStatusTask() {
         return status;
     }
@@ -52,13 +57,16 @@ public class Task {
         this.status = status;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
-        return "tasks.Task{" +
-                "title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", id=" + id +
-                ", status='" + status + '\'' +
-                '}';
+        return String.format("%d,%S,%s,%S,%s,", id, type, title, status, description);
     }
 }

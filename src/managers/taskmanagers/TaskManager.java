@@ -1,4 +1,4 @@
-package managers;
+package managers.taskmanagers;
 
 import tasks.Epic;
 import tasks.StatusTask;

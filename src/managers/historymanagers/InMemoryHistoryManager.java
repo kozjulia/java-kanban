@@ -1,5 +1,6 @@
-package managers;
+package managers.historymanagers;
 
+import managers.utils.Node;
 import tasks.Task;
 
 import java.util.Map;
@@ -8,13 +9,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    // история просмотров задач
-
     // история просмотра задач без повторных просмотров в ней и ограничения на размер истории
     public CustomLinkedList<Task> historyLinkedList = new CustomLinkedList<>();
     // мапа, где ключ = id задач, а значение — узел связного списка
     public Map<Integer, Node> nodeMap = new HashMap<>();
-
 
     @Override
     public List<Task> getHistory() {

@@ -1,6 +1,8 @@
+import managers.taskmanagers.FileBackedTasksManager;
 import managers.Managers;
-import managers.TaskManager;
+import managers.taskmanagers.TaskManager;
 import tasks.Epic;
+import tasks.StatusTask;
 import tasks.Subtask;
 import tasks.Task;
 
@@ -9,8 +11,10 @@ public class Main {
 
     public static void main(String[] args) {
         TaskManager taskManager = Managers.getDefault();
+        testSprint(taskManager);  // тестовые данные для ФЗ 6-го спринта
 
-        testSprint(taskManager);  // тестовые данные для ФЗ 5-го спринта
+        TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile(FileBackedTasksManager.file);
+        testSprintNew(taskManagerNew);  // тестовые данные для ФЗ 6-го спринта загрузка из файла
     }
 
     private static void printAllTasks(TaskManager taskManager) {
@@ -45,26 +49,18 @@ public class Main {
         taskManager.createSubtask("Творог", "200 гр.", idEpic);
         taskManager.createSubtask("Молоко", "2 литра", idEpic);
         taskManager.createEpic("Подготовиться к д/р", "детское");
-        printAllTasks(taskManager);
-        printHistory(taskManager);
-
         taskManager.getTask(1);
-        taskManager.getSubtask(4);
-        taskManager.getEpic(3);
-        printHistory(taskManager);
-
         taskManager.getEpic(3);
         taskManager.getTask(2);
         taskManager.getTask(1);
-        printHistory(taskManager);
-
+        taskManager.updateStatusSubtask(taskManager.getSubtask(6), StatusTask.DONE);
         taskManager.deleteTask(2);
-        taskManager.deleteEpic(7);
         printAllTasks(taskManager);
         printHistory(taskManager);
+    }
 
-        taskManager.deleteEpic(3);
-        printAllTasks(taskManager);
-        printHistory(taskManager);
+    private static void testSprintNew(TaskManager taskManagerNew) {
+        printAllTasks(taskManagerNew);
+        printHistory(taskManagerNew);
     }
 }

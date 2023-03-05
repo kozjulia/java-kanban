@@ -1,4 +1,4 @@
-package managers;
+package managers.utils;
 
 public class Node<Task> { //T extends Task> { // узел связного списка CustomLinkedList
     public Task data;

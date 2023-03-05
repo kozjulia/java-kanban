@@ -7,8 +7,14 @@ import java.util.ArrayList;
 public class Epic extends Task {
     private List<Integer> idSubtask = new ArrayList<>(); // уины подзадач эпика
 
+    public Epic() {
+        super();
+        this.setType(TypeTask.EPIC);
+    }
+
     public Epic(String title, String description) {
         super(title, description);
+        this.setType(TypeTask.EPIC);
     }
 
     public List<Integer> getIdSubtask() {
@@ -21,12 +27,8 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "tasks.Epic{" +
-                "title='" + super.getTitle() + '\'' +
-                ", description='" + super.getDescription() + '\'' +
-                ", id=" + super.getId() +
-                ", status='" + super.getStatusTask() + '\'' +
-                ", idSubtask.size()='" + idSubtask.size() + '\'' +
-                '}';
+        return String.format("%d,%S,%s,%S,%s,",
+                super.getId(), super.getType(), super.getTitle(),
+                super.getStatusTask(), super.getDescription());
     }
 }

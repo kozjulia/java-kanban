@@ -4,8 +4,14 @@ package tasks;
 public class Subtask extends Task {
     private int idEpic; // уин эпика для подзадачи
 
+    public Subtask() {
+        super();
+        this.setType(TypeTask.SUBTASK);
+    }
+
     public Subtask(String title, String description, int idEpic) {
         super(title, description);
+        this.setType(TypeTask.SUBTASK);
         this.idEpic = idEpic;
     }
 
@@ -19,12 +25,8 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "tasks.Subtask{" +
-                "title='" + super.getTitle() + '\'' +
-                ", description='" + super.getDescription() + '\'' +
-                ", id=" + super.getId() +
-                ", status='" + super.getStatusTask() + '\'' +
-                ", idEpic='" + idEpic + '\'' +
-                '}';
+        return String.format("%d,%S,%s,%S,%s,%d",
+                super.getId(), super.getType(), super.getTitle(),
+                super.getStatusTask(), super.getDescription(), idEpic);
     }
 }
