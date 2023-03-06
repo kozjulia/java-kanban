@@ -13,16 +13,17 @@ import java.util.List;
 // логика автосохранения в файл
 public class FileBackedTasksManager extends InMemoryTaskManager {
     // определение объекта для директории
-    public final File file = new File("resources" + File.separator + "data.csv");
+    public final File file;
 
-    public FileBackedTasksManager() {
+    public FileBackedTasksManager(String path) {
+        this.file = new File(path);
     }
 
     public static void main(String[] args) {
-        TaskManager taskManager = new FileBackedTasksManager();
+        TaskManager taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
         testSprint(taskManager);  // тестовые данные для ФЗ 6-го спринта
 
-        TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile();
+        TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
         testSprintNew(taskManagerNew);  // тестовые данные для ФЗ 6-го спринта загрузка из файла
     }
 
@@ -181,6 +182,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 fileWriter.append(ConverterCSV.toString(epic) + "\n");
             }
             for (Subtask subTask : super.getAllSubtask()) {
+                /////когда сохраняется subtask, после epicId не ставится запятая - ты написал
+                /////у меня запятая в субтасках после idEpic вроде не ставится
+                /////....public String toString() {
+                /////        return String.format("%d,%S,%s,%S,%s,%d", ...
+                ///// 6,SUBTASK,Молоко,DONE,2 литра,3
                 fileWriter.append(ConverterCSV.toString(subTask) + "\n");
             }
             fileWriter.newLine();
@@ -190,8 +196,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    public static FileBackedTasksManager loadFromFile() {
-        FileBackedTasksManager taskManager = new FileBackedTasksManager();
+    public static FileBackedTasksManager loadFromFile(String path) {
+        FileBackedTasksManager taskManager = new FileBackedTasksManager(path);
         taskManager.fillFromFile();
 
         return taskManager;
