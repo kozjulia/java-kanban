@@ -2,7 +2,7 @@ package managers;
 
 import managers.historymanagers.HistoryManager;
 import managers.historymanagers.InMemoryHistoryManager;
-import managers.taskmanagers.FileBackedTasksManager;
+import managers.taskmanagers.InMemoryTaskManager;
 import managers.taskmanagers.TaskManager;
 
 // утилитарный класс-менеджер
@@ -12,7 +12,7 @@ public class Managers {
     }
 
     public static TaskManager getDefault() {
-        return new FileBackedTasksManager(FileBackedTasksManager.file);
+        return new InMemoryTaskManager();
     }
 
     public static HistoryManager getDefaultHistory() {

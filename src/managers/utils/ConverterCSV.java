@@ -13,11 +13,11 @@ public class ConverterCSV {
     public ConverterCSV() {
     }
 
-    public String toString(Task task) { // метод сохранения задачи в строку
+    public static String toString(Task task) { // метод сохранения задачи в строку
         return task.toString();
     }
 
-    public Task fromString(String value) { // метод создания задачи из строки
+    public static Task fromString(String value) { // метод создания задачи из строки
         if (value.isBlank() || value.isEmpty()) {
             return null;
         }
@@ -34,7 +34,7 @@ public class ConverterCSV {
         }
     }
 
-    private Task fillTask(String[] params) { // создать задачу из параметров файла
+    private static Task fillTask(String[] params) { // создать задачу из параметров файла
         // params = [id,type,name,status,description,epic]
         if (params == null) {
             return null;
@@ -48,7 +48,7 @@ public class ConverterCSV {
     }
 
 
-    private Subtask fillSubTask(String[] params) { // создать подзадачу из параметров файла
+    private static Subtask fillSubTask(String[] params) { // создать подзадачу из параметров файла
         // params = [id,type,name,status,description,epic]
         if (params == null) {
             return null;
@@ -62,7 +62,7 @@ public class ConverterCSV {
         return subtask;
     }
 
-    private Epic fillEpic(String[] params) { // создать эпик из параметров файла
+    private static Epic fillEpic(String[] params) { // создать эпик из параметров файла
         // params = [id,type,name,status,description,epic]
         if (params == null) {
             return null;
@@ -76,7 +76,7 @@ public class ConverterCSV {
     }
 
     // заполнение статуса задач из строки
-    private StatusTask fillStatusFromString(String statusString) {
+    private static StatusTask fillStatusFromString(String statusString) {
         switch (statusString) {
             case "NEW":
                 return StatusTask.NEW;
@@ -110,5 +110,4 @@ public class ConverterCSV {
         }
         return idHistoryList;
     }
-
 }
