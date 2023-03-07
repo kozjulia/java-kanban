@@ -24,7 +24,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         testSprint(taskManager);  // тестовые данные для ФЗ 6-го спринта
 
         TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
-        //taskManagerNew.createTask("Новый таск", "с новым id");
         testSprintNew(taskManagerNew);  // тестовые данные для ФЗ 6-го спринта загрузка из файла
     }
 
@@ -183,11 +182,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 fileWriter.append(ConverterCSV.toString(epic) + "\n");
             }
             for (Subtask subTask : super.getAllSubtask()) {
-                /////когда сохраняется subtask, после epicId не ставится запятая - ты написал
-                /////у меня запятая в субтасках после idEpic вроде не ставится
-                /////....public String toString() {
-                /////        return String.format("%d,%S,%s,%S,%s,%d", ...
-                ///// 6,SUBTASK,Молоко,DONE,2 литра,3
                 fileWriter.append(ConverterCSV.toString(subTask) + "\n");
             }
             fileWriter.newLine();
