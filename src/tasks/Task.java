@@ -25,6 +25,14 @@ public class Task {
         return ++nextId;
     }
 
+    public static int getNextId() {
+        return nextId;
+    }
+
+    public static void setNextId(int nextId) {
+        Task.nextId = nextId;
+    }
+
     public int getId() {
         return id;
     }

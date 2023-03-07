@@ -44,9 +44,9 @@ public class ConverterCSV {
         task.setTitle(params[2]);
         task.setStatusTask(fillStatusFromString(params[3]));
         task.setDescription(params[4]);
+        checkNextId(task);
         return task;
     }
-
 
     private static Subtask fillSubTask(String[] params) { // создать подзадачу из параметров файла
         // params = [id,type,name,status,description,epic]
@@ -59,6 +59,7 @@ public class ConverterCSV {
         subtask.setStatusTask(fillStatusFromString(params[3]));
         subtask.setDescription(params[4]);
         subtask.setIdEpic(Integer.parseInt(params[5]));
+        checkNextId(subtask);
         return subtask;
     }
 
@@ -72,7 +73,14 @@ public class ConverterCSV {
         epic.setTitle(params[2]);
         epic.setStatusTask(fillStatusFromString(params[3]));
         epic.setDescription(params[4]);
+        checkNextId(epic);
         return epic;
+    }
+
+    private static void checkNextId(Task task) { // проверяем самый последний id для свозной нумерации новых задач
+        if (task.getId() > Task.getNextId()) {
+            Task.setNextId(task.getId());
+        }
     }
 
     // заполнение статуса задач из строки

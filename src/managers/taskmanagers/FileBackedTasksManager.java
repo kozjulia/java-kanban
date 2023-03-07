@@ -24,6 +24,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         testSprint(taskManager);  // тестовые данные для ФЗ 6-го спринта
 
         TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
+        //taskManagerNew.createTask("Новый таск", "с новым id");
         testSprintNew(taskManagerNew);  // тестовые данные для ФЗ 6-го спринта загрузка из файла
     }
 
