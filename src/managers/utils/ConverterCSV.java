@@ -18,7 +18,7 @@ public class ConverterCSV {
     }
 
     public static Task fromString(String value) { // метод создания задачи из строки
-        if (value.isBlank() || value.isEmpty()) {
+        if (value.isBlank() || value.isEmpty() || value == null) {
             return null;
         }
         String[] valueTask = value.split(",");
@@ -77,7 +77,8 @@ public class ConverterCSV {
         return epic;
     }
 
-    private static void checkNextId(Task task) { // проверяем самый последний id для свозной нумерации новых задач
+    // проверяем самый последний id для сквозной нумерации новых задач после загрузки из файла
+    private static void checkNextId(Task task) {
         if (task.getId() > Task.getNextId()) {
             Task.setNextId(task.getId());
         }
@@ -96,7 +97,21 @@ public class ConverterCSV {
         return StatusTask.NEW;
     }
 
-    // метод сохранения менеджера истории из CSV
+    // метод восстановления менеджера истории из CSV
+    public static List<Integer> historyFromString(String value) {
+        List<Integer> idHistoryList = new ArrayList<>();
+        if (value == null) {return idHistoryList;}
+        String[] idHistory = value.split(",");
+        for (int i = 0; i < idHistory.length; i++) {
+            if (idHistory[i].isEmpty() || idHistory[i].isBlank() || idHistory[i] == null ) {
+                continue;
+            }
+            idHistoryList.add(Integer.parseInt(idHistory[i]));
+        }
+        return idHistoryList;
+    }
+
+    // метод сохранения менеджера истории в строку файла CSV
     public static String historyToString(HistoryManager manager) {
         List<Task> historyTaskList = manager.getHistory();
         if (historyTaskList == null) {
@@ -107,15 +122,5 @@ public class ConverterCSV {
             historyBuf.append(task.getId() + ",");
         }
         return historyBuf.substring(0, historyBuf.length() - 1);
-    }
-
-    // метод восстановления менеджера истории из CSV
-    public static List<Integer> historyFromString(String value) {
-        String[] idHistory = value.split(",");
-        List<Integer> idHistoryList = new ArrayList<>();
-        for (int i = 0; i < idHistory.length; i++) {
-            idHistoryList.add(Integer.parseInt(idHistory[i]));
-        }
-        return idHistoryList;
     }
 }

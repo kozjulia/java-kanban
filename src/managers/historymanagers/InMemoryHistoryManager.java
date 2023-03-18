@@ -15,13 +15,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     public Map<Integer, Node> nodeMap = new HashMap<>();
 
     @Override
-    public List<Task> getHistory() {
-        // передаем историю, начав с последней просмотренной задачи
-        return historyLinkedList.getTasks();
-    }
-
-    @Override
     public void add(Task task) {  // добавить задачу в историю
+        if (task == null) {return;}
         int idCur = task.getId();
         if (nodeMap.get(idCur) != null) {
             remove(idCur);
@@ -32,6 +27,12 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {  // удалить задачу из истории
         historyLinkedList.removeNode(nodeMap.get(id));
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        // передаем историю, начав с последней просмотренной задачи
+        return historyLinkedList.getTasks();
     }
 
     public class CustomLinkedList<Task> {  // связный список для хранения истории

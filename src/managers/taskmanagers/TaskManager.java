@@ -16,24 +16,11 @@ public interface TaskManager {
 
     Task getTask(int id);
 
-    void createTask(String title, String description);
+    int createTask(Task task);
 
     void updateTask(Task task);
 
     void deleteTask(int id);
-
-    // Методы для класса tasks.Subtask
-    List<Subtask> getAllSubtask();
-
-    void deleteAllSubtask();
-
-    Subtask getSubtask(int id);
-
-    void createSubtask(String title, String description, int idEpic);
-
-    void updateSubtask(Subtask subtask);
-
-    void deleteSubtask(int id);
 
     // Методы для класса tasks.Epic
     List<Epic> getAllEpic();
@@ -42,18 +29,31 @@ public interface TaskManager {
 
     Epic getEpic(int id);
 
-    int createEpic(String title, String description);
+    int createEpic(Epic epic);
 
     void updateEpic(Epic epic);
 
     void deleteEpic(int id);
 
+    // Методы для класса tasks.Subtask
+    List<Subtask> getAllSubtask();
+
+    void deleteAllSubtask();
+
+    Subtask getSubtask(int id);
+
+    int createSubtask(Subtask subtask);
+
+    void updateSubtask(Subtask subtask);
+
+    void deleteSubtask(int id);
+
     // управление статусами задач
     void updateStatusTask(Task task, StatusTask status);
 
-    void updateStatusSubtask(Subtask subtask, StatusTask status);
-
     void updateStatusEpic(Epic epic);
+
+    void updateStatusSubtask(Subtask subtask, StatusTask status);
 
     List<Task> getHistory();
 }

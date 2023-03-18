@@ -51,14 +51,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private static void testSprint(TaskManager taskManager) {
-        taskManager.createTask("Покормить животных", "вкусным кормом");
-        taskManager.createTask("Поиграть", "в настольные игры");
+        taskManager.createTask(new Task("Покормить животных", "вкусным кормом"));
+        taskManager.createTask(new Task("Поиграть", "в настольные игры"));
         int idEpic;
-        idEpic = taskManager.createEpic("Сделать покупки", "продукты");
-        taskManager.createSubtask("Яблоки", "красные", idEpic);
-        taskManager.createSubtask("Творог", "200 гр.", idEpic);
-        taskManager.createSubtask("Молоко", "2 литра", idEpic);
-        taskManager.createEpic("Подготовиться к д/р", "детское");
+        idEpic = taskManager.createEpic(new Epic("Сделать покупки", "продукты"));
+        taskManager.createSubtask(new Subtask("Яблоки", "красные", idEpic));
+        taskManager.createSubtask(new Subtask("Творог", "200 гр.", idEpic));
+        taskManager.createSubtask(new Subtask("Молоко", "2 литра", idEpic));
+        taskManager.createEpic(new Epic("Подготовиться к д/р", "детское"));
         taskManager.getTask(1);
         taskManager.getEpic(3);
         taskManager.getTask(2);
@@ -89,9 +89,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void createTask(String title, String description) {
-        super.createTask(title, description);
+    public int createTask(Task task) {
+        int idTask = super.createTask(task);
         save();
+        return idTask;
     }
 
     @Override
@@ -103,38 +104,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteTask(int id) {
         super.deleteTask(id);
-        save();
-    }
-
-    // переопределение методов у SubTask
-    @Override
-    public void deleteAllSubtask() {
-        super.deleteAllSubtask();
-        save();
-    }
-
-    @Override
-    public Subtask getSubtask(int id) {
-        Subtask subtask = super.getSubtask(id);
-        save();
-        return subtask;
-    }
-
-    @Override
-    public void createSubtask(String title, String description, int idEpic) {
-        super.createSubtask(title, description, idEpic);
-        save();
-    }
-
-    @Override
-    public void updateSubtask(Subtask subtask) {
-        super.updateSubtask(subtask);
-        save();
-    }
-
-    @Override
-    public void deleteSubtask(int id) {
-        super.deleteSubtask(id);
         save();
     }
 
@@ -153,8 +122,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public int createEpic(String title, String description) {
-        int idEpic = super.createEpic(title, description);
+    public int createEpic(Epic epic) {
+        int idEpic = super.createEpic(epic);
         save();
         return idEpic;
     }
@@ -168,6 +137,39 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteEpic(int id) {
         super.deleteEpic(id);
+        save();
+    }
+
+    // переопределение методов у SubTask
+    @Override
+    public void deleteAllSubtask() {
+        super.deleteAllSubtask();
+        save();
+    }
+
+    @Override
+    public Subtask getSubtask(int id) {
+        Subtask subtask = super.getSubtask(id);
+        save();
+        return subtask;
+    }
+
+    @Override
+    public int createSubtask(Subtask subtask) {
+        int idSubtask = super.createSubtask(subtask);
+        save();
+        return idSubtask;
+    }
+
+    @Override
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
+        save();
+    }
+
+    @Override
+    public void deleteSubtask(int id) {
+        super.deleteSubtask(id);
         save();
     }
 
