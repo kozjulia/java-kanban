@@ -17,22 +17,15 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
-    // тесты для класса InMemoryTaskManagerTest
-    @Override
-    public void setTaskManager() {
-        taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
-    }
 
     @BeforeEach
-    // устанавливаем тип менеджера в наследнике
-    /////// Очень хотелось бы установить тип Таск Менеджера с аннотацией BeforeAll, но он статик
-    /////// испробовала всё, что знаю, не получилось. Может подскажешь?
     public void beforeEach() {
-        setTaskManager();
+        taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
         Task.setNextId(0); // обновляем внутренний счётчик сквозной нумерации
         task1 = new Task("Test task1", "Test task1 description", LocalDateTime.MAX, 15);
         task2 = new Task("Test task2", "Test task2 description",
@@ -48,10 +41,9 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
+    @DisplayName("тест сохранения текущего состояния менеджера в указанный файл")
     public void save() {
-        // тест сохранения текущего состояния менеджера в указанный файл
         loadTestData();
-
         // построчно собираю файл для будущей проверки
         final List<String> linesFile = new ArrayList<>(getLinesFile());
 
@@ -77,7 +69,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     private void loadTestData() {
-        // загрузить тестовые данные
+        // загружаю тестовые данные
         taskManager.createTask(task1);
         taskManager.createTask(task2);
         taskManager.createEpic(epic3);
@@ -110,11 +102,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
+    @DisplayName("тест сохранения пустого менеджера в указанный файл")
     public void saveEmpty() {
-        // тест сохранения пустого менеджера в указанный файл
         taskManager.createTask(task1);
         taskManager.deleteTask(1);
-
         // построчно собираю файл для будущей проверки
         final List<String> linesFile = new ArrayList<>(getLinesFile());
 
@@ -127,10 +118,9 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
+    @DisplayName("тест сохранения 1 эпика в указанный файл")
     public void save1Epic() {
-        // тест сохранения 1 эпика в указанный файл
         taskManager.createEpic(epic3);
-
         // построчно собираю файл для будущей проверки
         final List<String> linesFile = new ArrayList<>(getLinesFile());
 
@@ -145,8 +135,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
+    @DisplayName("тест заполнения из csv-файла")
     public void loadFromFile() {
-        // тест заполнения из csv-файла
         loadTestData();
         FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
         final List<Task> listTasks = taskManager.getAllTask();
@@ -171,8 +161,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
+    @DisplayName("тест заполнения из пустого csv-файла")
     public void loadFromEmptyFile() {
-        // тест заполнения из пустого csv-файла
         taskManager.createTask(task1);
         taskManager.deleteTask(1);
         FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
@@ -189,8 +179,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     }
 
     @Test
+    @DisplayName("тест заполнения из csv-файла с 1 эпиком")
     public void loadFromFile1Epic() {
-        // тест заполнения из csv-файла с 1 эпиком
         taskManager.createEpic(epic3);
         FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
         final List<Task> listTasks = taskManager.getAllTask();

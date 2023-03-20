@@ -9,24 +9,17 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
-    // тесты для класса InMemoryTaskManagerTest
-    @Override
-    public void setTaskManager() {
-        taskManager = new InMemoryTaskManager();
-    }
 
     @BeforeEach
-    // устанавливаем тип менеджера в наследнике
-    /////// Очень хотелось бы установить тип Таск Менеджера с аннотацией BeforeAll, но он статик
-    /////// испробовала всё, что знаю, не получилось. Может подскажешь?
     public void beforeEach() {
-        setTaskManager();
+        taskManager = new InMemoryTaskManager();
         Task.setNextId(0); // обновляем внутренний счётчик сквозной нумерации
         task1 = new Task("Test task1", "Test task1 description", LocalDateTime.MAX, 15);
         task2 = new Task("Test task2", "Test task2 description",
@@ -42,8 +35,8 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения списка подзадач по эпику")
     public void getListSubtaskByEpic() {
-        // получение списка подзадач по эпику
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         taskManager.createSubtask(subtask5);

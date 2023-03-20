@@ -10,26 +10,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
-    // тесты для абстрактного класса TaskManagerTest которые одинаковы у всех классов-наследников
-    public T taskManager;
-    public static Task task1;
-    public static Task task2;
-    public static Epic epic3;
-    public static Subtask subtask4;
-    public static Subtask subtask5;
-    public static Subtask subtask6;
-    public static Epic epic7;
 
-    // устанавливаем тип менеджера в наследнике
-    public abstract void setTaskManager();
+    // тесты для абстрактного класса TaskManagerTest, которые одинаковы у всех классов-наследников
+    protected T taskManager;
+    protected static Task task1;
+    protected static Task task2;
+    protected static Epic epic3;
+    protected static Subtask subtask4;
+    protected static Subtask subtask5;
+    protected static Subtask subtask6;
+    protected static Epic epic7;
 
     @Test
+    @DisplayName("тест получения списка всех задач")
     public void getAllTask() {
-        // тест получения списка всех задач
         taskManager.createTask(task1);
         taskManager.createTask(task2);
         final List<Task> tasks = taskManager.getAllTask();
@@ -41,39 +40,36 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения пустого списка всех задач")
     public void getAllNullTask() {
-        // тест получения пустого списка всех задач
         final List<Task> tasks = taskManager.getAllTask();
 
         assertTrue(tasks.isEmpty(), "Задачи возвращаются.");
-        assertEquals(0, tasks.size(), "Неверное количество задач.");
     }
 
     @Test
+    @DisplayName("тест удаления списка всех задач")
     public void deleteAllTask() {
-        // тест удаления списка всех задач
         taskManager.createTask(task1);
         taskManager.createTask(task2);
         taskManager.deleteAllTask();
         final List<Task> tasks = taskManager.getAllTask();
 
         assertTrue(tasks.isEmpty(), "Задачи возвращаются.");
-        assertEquals(0, tasks.size(), "Неверное количество задач.");
     }
 
     @Test
+    @DisplayName("тест удаления пустого списка всех задач")
     public void deleteAllNullTask() {
-        // тест удаления пустого списка всех задач
         taskManager.deleteAllTask();
         final List<Task> tasks = taskManager.getAllTask();
 
         assertTrue(tasks.isEmpty(), "Задачи возвращаются.");
-        assertEquals(0, tasks.size(), "Неверное количество задач.");
     }
 
     @Test
+    @DisplayName("тест получения задачи по id")
     public void getTask() {
-        // тест получения задачи по id
         final int idTask = taskManager.createTask(task1);
         Task getTask = taskManager.getTask(idTask);
 
@@ -82,8 +78,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения задачи по несуществующему id")
     public void getWrongTask() {
-        // тест получения задачи по несуществующему id
         taskManager.createTask(task1);
         Task getTask = taskManager.getTask(100);
 
@@ -91,8 +87,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест создания задачи")
     public void createTask() {
-        // тест создания задачи
         Task task = new Task("Test createNewTask", "Test createNewTask description",
                 LocalDateTime.of(2023, 03, 19, 10, 00), 30);
         final int idTask = taskManager.createTask(task);
@@ -107,20 +103,19 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест создания пустой задачи")
     public void createNullTask() {
-        // тест создания пустой задачи
         Task taskNull = null;
         final int idTask = taskManager.createTask(taskNull);
         final List<Task> tasks = taskManager.getAllTask();
 
         assertEquals(0, idTask, "Нулевая задача создалась");
         assertTrue(tasks.isEmpty(), "Нулевые задачи возвращаются.");
-        assertEquals(0, tasks.size(), "Неверное количество нулевых задач.");
     }
 
     @Test
+    @DisplayName("тест создания пересекающейся во времени задачи")
     public void createCrossTask() {
-        // тест создания пересекающейся во времени задачи
         taskManager.createTask(task2);
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
@@ -140,8 +135,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления задачи")
     public void updateTask() {
-        // тест обновления задачи
         taskManager.createTask(task1);
         Task updateTask = new Task("Test updateTask", "Test updateTask description",
                 LocalDateTime.of(2023, 03, 19, 10, 00), 30);
@@ -157,19 +152,18 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления пустой задачи")
     public void updateNullTask() {
-        // тест обновления пустой задачи
         Task updateTask = null;
         taskManager.updateTask(updateTask);
         final List<Task> tasks = taskManager.getAllTask();
 
         assertTrue(tasks.isEmpty(), "Нулевая задача возвращается.");
-        assertEquals(0, tasks.size(), "Неверное количество нулевых задач.");
     }
 
     @Test
+    @DisplayName("тест обновления пересекающейся во времени задачи")
     public void updateCrossTask() {
-        // тест обновления пересекающейся во времени задачи
         taskManager.createTask(task2);
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
@@ -190,8 +184,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест удаления задачи по id")
     public void deleteTask() {
-        // тест удаления задачи по id
         final int idTask = taskManager.createTask(task1);
         taskManager.createTask(task2);
         taskManager.deleteTask(idTask);
@@ -204,8 +198,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест удаления задачи по несуществующему id")
     public void deleteWrongTask() {
-        // тест удаления задачи по несуществующему id
         taskManager.createTask(task1);
         taskManager.deleteTask(100);
         final List<Task> tasks = taskManager.getAllTask();
@@ -216,8 +210,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения списка всех эпиков")
     public void getAllEpic() {
-        // тест получения списка всех эпиков
         taskManager.createEpic(epic3);
         taskManager.createEpic(epic7);
         final List<Epic> epics = taskManager.getAllEpic();
@@ -229,39 +223,36 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения пустого списка всех эпиков")
     public void getAllNullEpic() {
-        // тест получения пустого списка всех эпиков
         final List<Epic> epics = taskManager.getAllEpic();
 
         assertTrue(epics.isEmpty(), "Эпики возвращаются.");
-        assertEquals(0, epics.size(), "Неверное количество эпиков.");
     }
 
     @Test
+    @DisplayName("тест удаления списка всех эпиков")
     public void deleteAllEpic() {
-        // тест удаления списка всех эпиков
         taskManager.createEpic(epic3);
         taskManager.createEpic(epic7);
         taskManager.deleteAllEpic();
         final List<Epic> epics = taskManager.getAllEpic();
 
         assertTrue(epics.isEmpty(), "Эпики возвращаются.");
-        assertEquals(0, epics.size(), "Неверное количество эпиков.");
     }
 
     @Test
+    @DisplayName("тест удаления пустого списка всех эпиков")
     public void deleteAllNullEpic() {
-        // тест удаления пустого списка всех эпиков
         taskManager.deleteAllEpic();
         final List<Epic> epics = taskManager.getAllEpic();
 
         assertTrue(epics.isEmpty(), "Эпики возвращаются.");
-        assertEquals(0, epics.size(), "Неверное количество эпиков.");
     }
 
     @Test
+    @DisplayName("тест получения эпика по id")
     public void getEpic() {
-        // тест получения эпика по id
         final int idEpic = taskManager.createEpic(epic3);
         Epic getEpic = taskManager.getEpic(idEpic);
 
@@ -270,8 +261,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения эпика по несуществующему id")
     public void getWrongEpic() {
-        // тест получения эпика по несуществующему id
         taskManager.createEpic(epic3);
         Epic getEpic = taskManager.getEpic(100);
 
@@ -279,8 +270,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест создания эпика")
     public void createEpic() {
-        // тест создания эпика
         Epic epic = new Epic("Test createNewEpic", "Test createNewEpic description");
         final int idEpic = taskManager.createEpic(epic);
         final Epic savedEpic = taskManager.getEpic(idEpic);
@@ -294,9 +285,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест создания эпика и подзадачи для проверки правильности расчёта времени начала, " +
+            "окончания и продолжительности эпика")
     public void createEpicAndSubtask() {
-        // тест создания эпика и подзадачи для проверки правильности расчёта времени начала,
-        // окончания и продолжительности эпика
         epic3 = new Epic("Test epic3", "Test epic3 description");
         subtask4 = new Subtask("Test subtask4", "Test subtask4 description", epic3.getId(),
                 LocalDateTime.of(2023, 03, 16, 10, 00), 15);
@@ -315,20 +306,19 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест создания пустого эпика")
     public void createNullEpic() {
-        // тест создания пустого эпика
         Epic epicNull = null;
         final int idEpic = taskManager.createEpic(epicNull);
         final List<Epic> epics = taskManager.getAllEpic();
 
         assertEquals(0, idEpic, "Нулевой эпик создался");
         assertTrue(epics.isEmpty(), "Нулевые эпики возвращаются.");
-        assertEquals(0, epics.size(), "Неверное количество нулевых эпиков.");
     }
 
     @Test
+    @DisplayName("тест обновления эпика")
     public void updateEpic() {
-        // тест обновления эпика
         taskManager.createEpic(epic3);
         Epic updateEpic = new Epic("Test updateEpic", "Test updateEpic description");
         updateEpic.setId(epic3.getId());
@@ -343,19 +333,18 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления пустого эпика")
     public void updateNullEpic() {
-        // тест обновления пустого эпика
         Epic updateEpic = null;
         taskManager.updateEpic(updateEpic);
         final List<Epic> epics = taskManager.getAllEpic();
 
         assertTrue(epics.isEmpty(), "Нулевой эпик возвращается.");
-        assertEquals(0, epics.size(), "Неверное количество нулевых эпиков.");
     }
 
     @Test
+    @DisplayName("тест удаления эпика по id")
     public void deleteEpic() {
-        // тест удаления эпика по id
         final int idEpic = taskManager.createEpic(epic3);
         taskManager.createEpic(epic7);
         taskManager.deleteEpic(idEpic);
@@ -368,8 +357,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест удаления эпика по несуществующему id")
     public void deleteWrongEpic() {
-        // тест удаления эпика по несуществующему id
         taskManager.createEpic(epic3);
         taskManager.deleteEpic(100);
         final List<Epic> epics = taskManager.getAllEpic();
@@ -380,8 +369,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения списка всех подзадач")
     public void getAllSubtask() {
-        // тест получения списка всех подзадач
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         taskManager.createSubtask(subtask5);
@@ -394,17 +383,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения пустого списка всех подзадач")
     public void getAllNullSubtask() {
-        // тест получения пустого списка всех подзадач
         final List<Subtask> subtasks = taskManager.getAllSubtask();
 
         assertTrue(subtasks.isEmpty(), "Подзадачи возвращаются.");
-        assertEquals(0, subtasks.size(), "Неверное количество подзадач.");
     }
 
     @Test
+    @DisplayName("тест удаления списка всех подзадач")
     public void deleteAllSubtask() {
-        // тест удаления списка всех подзадач
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         taskManager.createSubtask(subtask5);
@@ -412,22 +400,20 @@ abstract class TaskManagerTest<T extends TaskManager> {
         final List<Subtask> subtasks = taskManager.getAllSubtask();
 
         assertTrue(subtasks.isEmpty(), "Задачи возвращаются.");
-        assertEquals(0, subtasks.size(), "Неверное количество задач.");
     }
 
     @Test
+    @DisplayName("тест удаления пустого списка всех подзадач")
     public void deleteAllNullSubtask() {
-        // тест удаления пустого списка всех подзадач
         taskManager.deleteAllSubtask();
         final List<Subtask> subtasks = taskManager.getAllSubtask();
 
         assertTrue(subtasks.isEmpty(), "Задачи возвращаются.");
-        assertEquals(0, subtasks.size(), "Неверное количество задач.");
     }
 
     @Test
+    @DisplayName("тест получения подзадачи по id")
     public void getSubtask() {
-        // тест получения подзадачи по id
         taskManager.createEpic(epic3);
         final int idSubtask = taskManager.createSubtask(subtask4);
         Subtask getSubtask = taskManager.getSubtask(idSubtask);
@@ -437,8 +423,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения подзадачи по несуществующему id")
     public void getWrongSubtask() {
-        // тест получения подзадачи по несуществующему id
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         Subtask getSubtask = taskManager.getSubtask(100);
@@ -448,8 +434,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
 
     @Test
+    @DisplayName("тест создания подзадачи")
     public void createSubtask() {
-        // тест создания подзадачи
         Epic epic = new Epic("Test Epic", "Test Epic description");
         final int idEpic = taskManager.createEpic(epic);
         Subtask subtask = new Subtask("Test createNewSubtask", "Test createNewSubtask description",
@@ -466,8 +452,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест создания пересекающейся во времени подзадачи")
     public void createCrossSubtask() {
-        // тест создания пересекающейся во времени подзадачи
         taskManager.createTask(task2);
         taskManager.createEpic(epic3);
         Subtask crossSubtask = new Subtask("Cross subtask", "Cross subtask description", 3,
@@ -486,20 +472,19 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест создания пустой подзадачи")
     public void createNullSubtask() {
-        // тест создания пустой подзадачи
         Subtask subtaskNull = null;
         final int idSubtask = taskManager.createSubtask(subtaskNull);
         final List<Subtask> subtasks = taskManager.getAllSubtask();
 
         assertEquals(0, idSubtask, "Нулевая подзадача создалась");
         assertTrue(subtasks.isEmpty(), "Нулевые подзадачи возвращаются.");
-        assertEquals(0, subtasks.size(), "Неверное количество нулевых подзадач.");
     }
 
     @Test
+    @DisplayName("тест обновления подзадачи")
     public void updateSubtask() {
-        // тест обновления подзадачи
         final int idEpic = taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         Subtask updateSubtask = new Subtask("Test updateSubtask", "Test updateSubtask description",
@@ -516,19 +501,18 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления пустой подзадачи")
     public void updateNullSubtask() {
-        // тест обновления пустой подзадачи
         Subtask updateSubtask = null;
         taskManager.updateSubtask(updateSubtask);
         final List<Subtask> subtasks = taskManager.getAllSubtask();
 
         assertTrue(subtasks.isEmpty(), "Нулевая подзадача возвращается.");
-        assertEquals(0, subtasks.size(), "Неверное количество нулевых подзадач.");
     }
 
     @Test
+    @DisplayName("тест обновления пересекающейся во времени подзадачи")
     public void updateCrossSubtask() {
-        // тест обновления пересекающейся во времени подзадачи
         taskManager.createTask(task2);
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
@@ -551,8 +535,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест удаления подзадачи по id")
     public void deleteSubtask() {
-        // тест удаления подзадачи по id
         taskManager.createEpic(epic3);
         final int idSubtask = taskManager.createSubtask(subtask4);
         taskManager.createSubtask(subtask5);
@@ -566,8 +550,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест удаления подзадачи по несуществующему id")
     public void deleteWrongSubtask() {
-        // тест удаления подзадачи по несуществующему id
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         taskManager.deleteSubtask(100);
@@ -579,8 +563,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления статуса задачи")
     public void updateStatusTask() {
-        // обновление статуса задачи
         taskManager.createTask(task1);
         taskManager.updateStatusTask(task1, StatusTask.IN_PROGRESS);
 
@@ -589,8 +573,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления статуса нулевой задачи")
     public void updateStatusNullTask() {
-        // обновление статуса нулевой задачи
         Task task = null;
         taskManager.updateStatusTask(task, StatusTask.IN_PROGRESS);
 
@@ -599,8 +583,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
 
     @Test
+    @DisplayName("тест обновления статуса эпика")
     public void updateStatusEpic() {
-        // обновление статуса эпика
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         taskManager.createSubtask(subtask5);
@@ -626,8 +610,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления статуса нулевого эпика")
     public void updateStatusNullEpic() {
-        // обновление статуса нулевого эпика
         Epic epic = null;
         taskManager.updateStatusEpic(epic);
 
@@ -635,8 +619,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления статуса подзадачи")
     public void updateStatusSubtask() {
-        // обновление статуса подзадачи
         taskManager.createEpic(epic3);
         taskManager.createSubtask(subtask4);
         taskManager.updateStatusSubtask(subtask4, StatusTask.IN_PROGRESS);
@@ -648,8 +632,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест обновления статуса нулевой подзадачи")
     public void updateStatusNullSubtask() {
-        // обновление статуса нулевой подзадачи
         Subtask subtask = null;
         taskManager.updateStatusSubtask(subtask, StatusTask.IN_PROGRESS);
 
@@ -657,8 +641,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    @DisplayName("тест получения отсортированного по startTime задач и подзадач")
     public void getPrioritizedTasks() {
-        // тест получения отсортированного по startTime задач и подзадач
         taskManager.createTask(task1);
         taskManager.createTask(task2);
         taskManager.createEpic(epic3);

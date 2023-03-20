@@ -10,18 +10,19 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InMemoryHistoryManagerTest {
-    public static HistoryManager historyManager;
-    public static Task task1;
-    public static Task task2;
-    public static Epic epic3;
-    public static Subtask subtask4;
-    public static Epic epic5;
+    private static HistoryManager historyManager;
+    private static Task task1;
+    private static Task task2;
+    private static Epic epic3;
+    private static Subtask subtask4;
+    private static Epic epic5;
 
     @BeforeAll
     public static void beforeAll() {
@@ -40,8 +41,8 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("тест добавления задачи в историю")
     public void add() {
-        // тест добавления задачи в историю
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(epic3);
@@ -64,8 +65,8 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("тест добавления нулевой задачи в историю")
     public void addNull() {
-        // тест добавления нулевой задачи в историю
         historyManager.add(null);
         final List<Task> history = historyManager.getHistory();
 
@@ -73,8 +74,8 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("тест удаления задачи из истории")
     public void remove() {
-        // тест удаления задачи из истории
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(epic3);
@@ -91,7 +92,7 @@ class InMemoryHistoryManagerTest {
         assertEquals(subtask4, history.get(1), "Очередность истории неправильная.");
         assertEquals(epic5, history.get(0), "Очередность истории неправильная.");
 
-        // удаление с конца истории
+        // удаление из конца истории
         historyManager.remove(5);
         history = historyManager.getHistory();
 
@@ -101,7 +102,7 @@ class InMemoryHistoryManagerTest {
         assertEquals(task2, history.get(1), "Очередность истории неправильная.");
         assertEquals(subtask4, history.get(0), "Очередность истории неправильная.");
 
-        // удаление с начала истории
+        // удаление из начала истории
         historyManager.remove(1);
         history = historyManager.getHistory();
 
@@ -112,8 +113,8 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("тест удаления задачи по несуществующему id из истории")
     public void removeWrong() {
-        // тест удаления задачи по несуществующему id из истории
         historyManager.remove(100);
         final List<Task> history = historyManager.getHistory();
 
@@ -121,8 +122,8 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("тест получения истории")
     public void getHistory() {
-        // тест получения истории
         historyManager.add(task1);
         historyManager.add(task2);
         historyManager.add(epic3);
@@ -136,8 +137,8 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    @DisplayName("тест получения нулевой истории")
     public void getNullHistory() {
-        // тест получения нулевой истории
         final List<Task> history = historyManager.getHistory();
 
         assertNull(history, "История пустая.");

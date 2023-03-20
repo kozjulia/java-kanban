@@ -7,18 +7,20 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConverterCSVTest {
+
     @BeforeEach
     public void beforeEach() {
         Task.setNextId(0); // обновляем внутренний счётчик сквозной нумерации
     }
 
     @Test
+    @DisplayName("тест создания задачи из строки файла")
     public void fromStringTask() {
-        // тест создания задачи из строки файла
         // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         Task task = ConverterCSV.fromString("1,TASK,Test task,NEW," +
                 "Test task description,,15.03.2023 10:00:00,15,");
@@ -36,8 +38,8 @@ class ConverterCSVTest {
     }
 
     @Test
+    @DisplayName("тест создания эпика из строки файла")
     public void fromStringEpic() {
-        // тест создания задачи из строки файла
         // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         Epic epic = (Epic) ConverterCSV.fromString("3,EPIC,Test epic," +
                 "IN_PROGRESS,Test epic description,,31.12.+999999999 23:59:59,0,31.12.+999999999 23:59:59");
@@ -57,8 +59,8 @@ class ConverterCSVTest {
     }
 
     @Test
+    @DisplayName("тест создания подзадачи из строки файла")
     public void fromStringSubtask() {
-        // тест создания подзадачи из строки файла
         // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         Subtask subtask = (Subtask) ConverterCSV.fromString("4,SUBTASK,Test subtask," +
                 "DONE,Test subtask description,3,15.03.2023 10:00:00,15,");
@@ -72,22 +74,22 @@ class ConverterCSVTest {
                 "Неверное описание задачи.");
         assertEquals(3, subtask.getIdEpic(), "Неверный id эпика подзадачи.");
         assertEquals(LocalDateTime.parse("15.03.2023 10:00:00", ConverterCSV.FORMATTER),
-                subtask.getStartTime(),"Неверное время старта подзадачи.");
+                subtask.getStartTime(), "Неверное время старта подзадачи.");
         assertEquals(15, subtask.getDuration(), "Неверная продолжительность подзадачи.");
         assertEquals(4, Subtask.getNextId(), "Неверное id следующей задачи.");
     }
 
     @Test
+    @DisplayName("тест создания нулевой задачи из строки файла")
     public void fromStringEmptyTask() {
-        // тест создания нулевой задачи из строки файла
         Task task = ConverterCSV.fromString("");
 
         assertNull(task, "Задача найдена.");
     }
 
     @Test
+    @DisplayName("тест восстановления менеджера истории из строки CSV")
     public void historyFromString() {
-        // метод восстановления менеджера истории из строки CSV
         final List<Integer> idHistory = ConverterCSV.historyFromString("3,6,1");
 
         assertNotNull(idHistory, "История задач не найдена.");
@@ -97,16 +99,16 @@ class ConverterCSVTest {
     }
 
     @Test
+    @DisplayName("тест восстановления менеджера истории из пустой строки CSV")
     public void historyFromEmptyString() {
-        // метод восстановления менеджера истории из пустой строки CSV
         final List<Integer> idHistory = ConverterCSV.historyFromString("");
 
         assertEquals(0, idHistory.size(), "История задач найдена.");
     }
 
     @Test
+    @DisplayName("тест восстановления менеджера истории из нулевой строки CSV")
     public void historyFromNullString() {
-        // метод восстановления менеджера истории из нулевой строки CSV
         final List<Integer> idHistory = ConverterCSV.historyFromString(null);
 
         assertEquals(0, idHistory.size(), "История задач найдена.");
