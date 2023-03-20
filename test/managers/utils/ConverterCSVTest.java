@@ -1,10 +1,12 @@
 package managers.utils;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import tasks.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,8 +19,9 @@ class ConverterCSVTest {
     @Test
     public void fromStringTask() {
         // тест создания задачи из строки файла
-        // params = [id,type,name,status,description,epic]
-        Task task = ConverterCSV.fromString("1,TASK,Test task,NEW,Test task description,");
+        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
+        Task task = ConverterCSV.fromString("1,TASK,Test task,NEW," +
+                "Test task description,,15.03.2023 10:00:00,15,");
 
         assertNotNull(task, "Задача не найдена.");
         assertEquals(1, task.getId(), "Неверное id задачи.");
@@ -26,14 +29,18 @@ class ConverterCSVTest {
         assertEquals("Test task", task.getTitle(), "Неверное наименование задачи.");
         assertEquals(StatusTask.NEW, task.getStatusTask(), "Неверный статус задачи.");
         assertEquals("Test task description", task.getDescription(), "Неверное описание задачи.");
+        assertEquals(LocalDateTime.parse("15.03.2023 10:00:00", ConverterCSV.FORMATTER), task.getStartTime(),
+                "Неверное время старта задачи.");
+        assertEquals(15, task.getDuration(), "Неверная продолжительность задачи.");
         assertEquals(1, Task.getNextId(), "Неверное id следующей задачи.");
     }
 
     @Test
     public void fromStringEpic() {
         // тест создания задачи из строки файла
-        // params = [id,type,name,status,description,epic]
-        Epic epic = (Epic) ConverterCSV.fromString("3,EPIC,Test epic,IN_PROGRESS,Test epic description,");
+        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
+        Epic epic = (Epic) ConverterCSV.fromString("3,EPIC,Test epic," +
+                "IN_PROGRESS,Test epic description,,31.12.+999999999 23:59:59,0,31.12.+999999999 23:59:59");
 
         assertNotNull(epic, "Эпик не найден.");
         assertEquals(3, epic.getId(), "Неверное id эпика.");
@@ -41,22 +48,32 @@ class ConverterCSVTest {
         assertEquals("Test epic", epic.getTitle(), "Неверное наименование эпика.");
         assertEquals(StatusTask.IN_PROGRESS, epic.getStatusTask(), "Неверный статус эпика.");
         assertEquals("Test epic description", epic.getDescription(), "Неверное описание эпика.");
+        assertEquals(LocalDateTime.parse("31.12.+999999999 23:59:59", ConverterCSV.FORMATTER),
+                epic.getStartTime(), "Неверное время старта эпика.");
+        assertEquals(0, epic.getDuration(), "Неверная продолжительность эпика.");
+        assertEquals(LocalDateTime.parse("31.12.+999999999 23:59:59", ConverterCSV.FORMATTER),
+                epic.getEndTime(), "Неверное время окончания эпика.");
         assertEquals(3, Epic.getNextId(), "Неверное id следующей задачи.");
     }
 
     @Test
     public void fromStringSubtask() {
         // тест создания подзадачи из строки файла
-        // params = [id,type,name,status,description,epic]
-        Subtask subtask = (Subtask) ConverterCSV.fromString("4,SUBTASK,Test subtask,DONE,Test subtask description,3");
+        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
+        Subtask subtask = (Subtask) ConverterCSV.fromString("4,SUBTASK,Test subtask," +
+                "DONE,Test subtask description,3,15.03.2023 10:00:00,15,");
 
         assertNotNull(subtask, "Задача не найдена.");
         assertEquals(4, subtask.getId(), "Неверное id задачи.");
         assertEquals(TypeTask.SUBTASK, subtask.getType(), "Неверный тип задачи.");
         assertEquals("Test subtask", subtask.getTitle(), "Неверное наименование задачи.");
         assertEquals(StatusTask.DONE, subtask.getStatusTask(), "Неверный статус задачи.");
-        assertEquals("Test subtask description", subtask.getDescription(), "Неверное описание задачи.");
-        assertEquals(3, subtask.getIdEpic(), "Неверный статус задачи.");
+        assertEquals("Test subtask description", subtask.getDescription(),
+                "Неверное описание задачи.");
+        assertEquals(3, subtask.getIdEpic(), "Неверный id эпика подзадачи.");
+        assertEquals(LocalDateTime.parse("15.03.2023 10:00:00", ConverterCSV.FORMATTER),
+                subtask.getStartTime(),"Неверное время старта подзадачи.");
+        assertEquals(15, subtask.getDuration(), "Неверная продолжительность подзадачи.");
         assertEquals(4, Subtask.getNextId(), "Неверное id следующей задачи.");
     }
 

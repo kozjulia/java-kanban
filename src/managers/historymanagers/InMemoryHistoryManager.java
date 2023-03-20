@@ -16,7 +16,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {  // добавить задачу в историю
-        if (task == null) {return;}
+        if (task == null) {
+            return;
+        }
         int idCur = task.getId();
         if (nodeMap.get(idCur) != null) {
             remove(idCur);
@@ -27,6 +29,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {  // удалить задачу из истории
         historyLinkedList.removeNode(nodeMap.get(id));
+        nodeMap.remove(id);
     }
 
     @Override

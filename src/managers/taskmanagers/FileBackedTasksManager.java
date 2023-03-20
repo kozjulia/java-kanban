@@ -1,14 +1,16 @@
 package managers.taskmanagers;
 
-import managers.utils.ConverterCSV;
+import managers.exception.SaveTaskException;
 import managers.exception.ManagerSaveException;
+import managers.utils.ConverterCSV;
 import tasks.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 // логика автосохранения в файл
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -16,15 +18,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public final File file;
 
     public FileBackedTasksManager(String path) {
+        super();
         this.file = new File(path);
     }
 
     public static void main(String[] args) {
         TaskManager taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
-        testSprint(taskManager);  // тестовые данные для ФЗ 6-го спринта
+        testSprint(taskManager);  // тестовые данные для ФЗ 7-го спринта
 
         TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
-        testSprintNew(taskManagerNew);  // тестовые данные для ФЗ 6-го спринта загрузка из файла
+        testSprintNew(taskManagerNew);  // тестовые данные для ФЗ 7-го спринта загрузка из файла
     }
 
     private static void printAllTasks(TaskManager taskManager) {
@@ -50,14 +53,26 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
+    private static void printSortSet(TaskManager taskManager) {
+        System.out.println("\nСортированный список задач и подзадач:");
+        for (Task task : taskManager.getPrioritizedTasks()) {
+            System.out.println(task);
+        }
+    }
+
     private static void testSprint(TaskManager taskManager) {
-        taskManager.createTask(new Task("Покормить животных", "вкусным кормом"));
-        taskManager.createTask(new Task("Поиграть", "в настольные игры"));
+        taskManager.createTask(new Task("Покормить животных", "вкусным кормом",
+                LocalDateTime.MAX, 0));
+        taskManager.createTask(new Task("Поиграть", "в настольные игры",
+                LocalDateTime.of(2023, 03, 19, 10, 00), 30));
         int idEpic;
         idEpic = taskManager.createEpic(new Epic("Сделать покупки", "продукты"));
-        taskManager.createSubtask(new Subtask("Яблоки", "красные", idEpic));
-        taskManager.createSubtask(new Subtask("Творог", "200 гр.", idEpic));
-        taskManager.createSubtask(new Subtask("Молоко", "2 литра", idEpic));
+        taskManager.createSubtask(new Subtask("Яблоки", "красные", idEpic,
+                LocalDateTime.of(2023, 03, 15, 10, 00), 15));
+        taskManager.createSubtask(new Subtask("Творог", "200 гр.", idEpic,
+                LocalDateTime.of(2023, 03, 15, 12, 00), 15));
+        taskManager.createSubtask(new Subtask("Молоко", "2 литра", idEpic,
+                LocalDateTime.of(2023, 03, 16, 11, 00), 45));
         taskManager.createEpic(new Epic("Подготовиться к д/р", "детское"));
         taskManager.getTask(1);
         taskManager.getEpic(3);
@@ -65,13 +80,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         taskManager.getTask(1);
         taskManager.updateStatusSubtask(taskManager.getSubtask(6), StatusTask.DONE);
         taskManager.deleteTask(2);
+        try {
+            taskManager.createTask(new Task("Не сохранится", "из-за пересечения",
+                    LocalDateTime.of(2023, 03, 15, 10, 15), 20));
+        } catch (SaveTaskException exp) {
+            System.out.println(exp.getMessage());
+        }
         printAllTasks(taskManager);
         printHistory(taskManager);
+        printSortSet(taskManager);
     }
 
     private static void testSprintNew(TaskManager taskManagerNew) {
         printAllTasks(taskManagerNew);
         printHistory(taskManagerNew);
+        printSortSet(taskManagerNew);
     }
 
     // переопределение методов у Task
@@ -176,7 +199,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     // методы для работы с файлом
     private void save() { // сохраняет текущее состояние менеджера в указанный файл
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
-            fileWriter.append("id,type,name,status,description,epic\n");
+            fileWriter.append("id,type,name,status,description,epic,startTime,duration,endTime\n");
             for (Task task : super.getAllTask()) {
                 fileWriter.append(ConverterCSV.toString(task) + "\n");
             }
@@ -202,7 +225,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void fillFromFile() {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            String lineOfFile = fileReader.readLine(); // params = [id,type,name,status,description,epic]
+            String lineOfFile = fileReader.readLine();
+            // params = [id,type,name,status,description,epic,startTime,duration,endTime]
             Boolean isHistory = false;
             while (fileReader.ready()) {
                 lineOfFile = fileReader.readLine();
@@ -219,11 +243,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         } else if (!isHistory) { // обновляем - добавляем в мапу
             Task task = ConverterCSV.fromString(lineOfFile);
             if (task.getType() == TypeTask.TASK) {
-                updateTask(task);
+                createTask(task);
             } else if (task.getType() == TypeTask.EPIC) {
-                updateEpic((Epic) task);
+                createEpic((Epic) task);
             } else if (task.getType() == TypeTask.SUBTASK) {
-                updateSubtask((Subtask) task);
+                createSubtask((Subtask) task);
             }
         } else {
             List<Integer> historyList = new ArrayList<>(ConverterCSV.historyFromString(lineOfFile));
@@ -233,7 +257,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     historyManager.add(getTask(idHistory));
                 } else if (getSubtask(idHistory) != null) {
                     historyManager.add(getSubtask(idHistory));
-                } else if (getEpic(idHistory) != null) {
+                } else if (getEpicForUpdate(idHistory) != null) {
                     historyManager.add(getEpic(idHistory));
                 }
             }

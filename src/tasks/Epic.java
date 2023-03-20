@@ -2,10 +2,12 @@ package tasks;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 // эпик, состоит из подзадач
 public class Epic extends Task {
-    private List<Integer> idSubtask = new ArrayList<>(); // уины подзадач эпика
+    private List<Integer> idSubtask = new ArrayList<>(); // id подзадач эпика
+    private LocalDateTime endTime; // время завершения задачи
 
     public Epic() {
         super();
@@ -13,8 +15,9 @@ public class Epic extends Task {
     }
 
     public Epic(String title, String description) {
-        super(title, description);
+        super(title, description, LocalDateTime.MAX, 0);
         this.setType(TypeTask.EPIC);
+        this.endTime = this.getStartTime();
     }
 
     public List<Integer> getIdSubtask() {
@@ -26,9 +29,21 @@ public class Epic extends Task {
     }
 
     @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        // расчётное время завершения задачи
+        this.endTime = endTime;
+    }
+
+    @Override
     public String toString() {
-        return String.format("%d,%S,%s,%S,%s,",
+        return String.format("%d,%S,%s,%S,%s,,%s,%d,%s",
                 super.getId(), super.getType(), super.getTitle(),
-                super.getStatusTask(), super.getDescription());
+                super.getStatusTask(), super.getDescription(),
+                super.getStartTime().format(super.formatter), super.getDuration(),
+                getEndTime().format(super.formatter));
     }
 }

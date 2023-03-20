@@ -1,16 +1,16 @@
 package managers.taskmanagers;
 
 import managers.Managers;
+import managers.exception.SaveTaskException;
 import managers.historymanagers.HistoryManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 import tasks.StatusTask;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -18,21 +18,55 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Subtask> mapSubtask = new HashMap<>(); // таблица подзадач
     private final Map<Integer, Epic> mapEpic = new HashMap<>(); // таблица эпиков
     public HistoryManager historyManager = Managers.getDefaultHistory();
+    // компаратор для множества задач
+    Comparator<Task> comparator = (o1, o2) ->
+            o1.getStartTime().compareTo(o2.getStartTime());
+    // компаратор для дерева
+    Comparator<LocalDateTime> comparatorMap = LocalDateTime::compareTo;
+
+    // сортированное по началу даты множество задач и подзадач
+    private final Set<Task> sortSetTask = new TreeSet<>(comparator);
+    ///// дерево времени - занятое задачами и подзадачами за год 15-минутные промежутки
+    ///// Boolean, как в подсказке недостаточно, так как может обновляться уже существующая задача,
+    ///// если при обновлении удалять текущую, а записать обновлённую - она может быть с новым временем
+    ///// и пересечься с третьей задачей, т.е. не записаться, а старую версию мы уже удалим,
+    ///// поэтому использую вместо Boolean Integer - номер задачи, если 0 - то пусто
+    private final Map<LocalDateTime, Integer> busyTime = new TreeMap<>(comparatorMap);
+
+    public InMemoryTaskManager() {
+        // заполняем дерево за год с разницей в 15 минут
+        fillBusyTime(LocalDateTime.of(2023, 1, 1, 0, 0),
+                LocalDateTime.of(2024, 1, 1, 0, 0), 0);
+    }
+
+    private void fillBusyTime(LocalDateTime curTime, LocalDateTime endTime, Integer idFlag) {
+        while (true) {
+            if (curTime.isEqual(LocalDateTime.MAX)) {
+                break;
+            }
+            if (curTime.isEqual(LocalDateTime.MAX.minusNanos(999999999))) {
+                break;
+            }
+            busyTime.put(curTime, idFlag);
+            curTime = curTime.plusMinutes(15);
+            if (curTime.isEqual(endTime)) {
+                break;
+            }
+        }
+    }
 
     // Методы для класса tasks.Task
     @Override
     public List<Task> getAllTask() { // получение списка всех задач
-        List<Task> listTask = new ArrayList<>();
-        for (Task task : mapTask.values()) {
-            listTask.add(task);
-        }
-        return listTask;
+        return new ArrayList<>(mapTask.values());
     }
 
     @Override
     public void deleteAllTask() { // удаление всех задач
         for (Integer id : mapTask.keySet()) {
             historyManager.remove(id);
+            sortSetTask.remove(getTask(id));
+            fillBusyTime(getTask(id).getStartTime(), getTask(id).getEndTime(), 0);
         }
         mapTask.clear();
     }
@@ -52,20 +86,37 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return 0;
         }
+        //if (!checkTimeCross(task)) { // проверка за O(n)
+        if (!checkTimeCrossMap(task)) {
+            throw new SaveTaskException(String.format(
+                    "Невозможно создать новую задачу %s из-за пересечения во времени", task));
+        }
         mapTask.put(task.getId(), task);
+        sortSetTask.add(task);
+        fillBusyTime(task.getStartTime(), task.getEndTime(), task.getId());
         return task.getId();
     }
 
     @Override
     public void updateTask(Task task) { // обновление
-        if (task != null) {
-            mapTask.put(task.getId(), task);
+        if (task == null) {
+            return;
         }
+        //if (!checkTimeCross(task)) { // проверка за O(n)
+        if (!checkTimeCrossMap(task)) {
+            throw new SaveTaskException(String.format(
+                    "Невозможно обновить задачу %s из-за пересечения во времени", task));
+        }
+        mapTask.put(task.getId(), task);
+        sortSetTask.add(task);
+        fillBusyTime(task.getStartTime(), task.getEndTime(), task.getId());
     }
 
     @Override
     public void deleteTask(int id) { // удаление по идентификатору
         if (mapTask.containsKey(id)) {
+            sortSetTask.remove(getTask(id));
+            fillBusyTime(getTask(id).getStartTime(), getTask(id).getEndTime(), 0);
             mapTask.remove(id);
             historyManager.remove(id);
         }
@@ -74,11 +125,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Методы для класса tasks.Epic
     @Override
     public List<Epic> getAllEpic() { // получение списка всех задач
-        List<Epic> listEpic = new ArrayList<>();
-        for (Epic epic : mapEpic.values()) {
-            listEpic.add(epic);
-        }
-        return listEpic;
+        return new ArrayList<>(mapEpic.values());
     }
 
     @Override
@@ -100,23 +147,32 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    // получение по идентификатору для обновления без записи в историю
+    public Epic getEpicForUpdate(int id) {
+        return mapEpic.getOrDefault(id, null);
+    }
+
     @Override
     public int createEpic(Epic epic) { // создание
-        if (epic == null) {return 0;}
+        if (epic == null) {
+            return 0;
+        }
         mapEpic.put(epic.getId(), epic);
         return epic.getId();
     }
 
     @Override
     public void updateEpic(Epic epic) { // обновление
-        if (epic != null) {
-            ArrayList<Integer> idSubtasks = new ArrayList<>(); // обновляем список подзадач
-            for (Subtask subtask : getListSubtaskByEpic(epic)) {
-                idSubtasks.add(subtask.getId());
-            }
-            epic.setIdSubtask(idSubtasks);
-            mapEpic.put(epic.getId(), epic);
+        if (epic == null) {
+            return;
         }
+        ArrayList<Integer> idSubtasks = new ArrayList<>(); // обновляем список подзадач
+        for (Subtask subtask : getListSubtaskByEpic(epic)) {
+            idSubtasks.add(subtask.getId());
+        }
+        updateTimesDurationEpic(epic);
+        epic.setIdSubtask(idSubtasks);
+        mapEpic.put(epic.getId(), epic);
     }
 
     @Override
@@ -135,17 +191,15 @@ public class InMemoryTaskManager implements TaskManager {
     // Методы для класса tasks.Subtask
     @Override
     public List<Subtask> getAllSubtask() { // получение списка всех задач
-        List<Subtask> listSubtask = new ArrayList<>();
-        for (Subtask subtask : mapSubtask.values()) {
-            listSubtask.add(subtask);
-        }
-        return listSubtask;
+        return new ArrayList<>(mapSubtask.values());
     }
 
     @Override
     public void deleteAllSubtask() { // удаление всех задач
         for (Integer id : mapSubtask.keySet()) {
             historyManager.remove(id);
+            sortSetTask.remove(getSubtask(id));
+            fillBusyTime(getSubtask(id).getStartTime(), getSubtask(id).getEndTime(), 0);
         }
         mapSubtask.clear();
         for (Epic epic : mapEpic.values()) {
@@ -165,26 +219,45 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public int createSubtask(Subtask subtask) { // создание
-        if (subtask == null) {return 0;}
+        if (subtask == null) {
+            return 0;
+        }
+        //if (!checkTimeCross(subtask)) { // проверка за O(n)
+        if (!checkTimeCrossMap(subtask)) {
+            throw new SaveTaskException(String.format(
+                    "Невозможно создать новую подзадачу %s из-за пересечения во времени", subtask));
+        }
         mapSubtask.put(subtask.getId(), subtask);
+        sortSetTask.add(subtask);
+        fillBusyTime(subtask.getStartTime(), subtask.getEndTime(), subtask.getId());
         // записываем новое уин подзадачи в эпик
-        updateStatusEpic(getEpic(subtask.getIdEpic()));
+        updateStatusEpic(getEpicForUpdate(subtask.getIdEpic()));
         return subtask.getId();
     }
 
     @Override
     public void updateSubtask(Subtask subtask) { // обновление
-        if (subtask != null) {
-            mapSubtask.put(subtask.getId(), subtask);
-            updateStatusEpic(getEpic(subtask.getIdEpic()));
+        if (subtask == null) {
+            return;
         }
+        //if (!checkTimeCross(subtask)) { // проверка за O(n)
+        if (!checkTimeCrossMap(subtask)) {
+            throw new SaveTaskException(String.format(
+                    "Невозможно обновить подзадачу %s из-за пересечения во времени", subtask));
+        }
+        mapSubtask.put(subtask.getId(), subtask);
+        sortSetTask.add(subtask);
+        fillBusyTime(subtask.getStartTime(), subtask.getEndTime(), subtask.getId());
+        updateStatusEpic(getEpicForUpdate(subtask.getIdEpic()));
     }
 
     @Override
     public void deleteSubtask(int id) { // удаление по идентификатору
         Epic epic = null;
         if (mapSubtask.containsKey(id)) {
-            epic = getEpic(mapSubtask.get(id).getIdEpic());
+            epic = getEpicForUpdate(mapSubtask.get(id).getIdEpic());
+            sortSetTask.remove(getSubtask(id));
+            fillBusyTime(getSubtask(id).getStartTime(), getSubtask(id).getEndTime(), 0);
             mapSubtask.remove(id);
             historyManager.remove(id);
         }
@@ -207,8 +280,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return;
         }
-        List<Subtask> listSubtask = new ArrayList<>();
-        listSubtask = getListSubtaskByEpic(epic);
+        List<Subtask> listSubtask = getListSubtaskByEpic(epic);
         boolean change = false; // отслеживаем изменен ли был статус эпика
         // если у эпика нет подзадач, то статус должен быть NEW
         if (listSubtask.size() == 0) {
@@ -235,7 +307,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setStatusTask(status);
         updateSubtask(subtask);
         if (mapEpic.containsValue(subtask.getIdEpic())) {
-            updateStatusEpic(getEpic(subtask.getIdEpic()));
+            updateStatusEpic(getEpicForUpdate(subtask.getIdEpic()));
         }
     }
 
@@ -243,6 +315,12 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    // возвращает список задач и подзадач по приоритету — то есть по startTime
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        return sortSetTask.stream().collect(Collectors.toList());
     }
 
     // получение списка всех подзадач определённого эпика
@@ -265,5 +343,71 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
         return check;
+    }
+
+    // обновление дат, времени начала и окончания эпика, его продолжительности
+    private void updateTimesDurationEpic(Epic epic) {
+        final List<Subtask> subtasks = getListSubtaskByEpic(epic);
+        LocalDateTime startTime = LocalDateTime.MAX;
+        int duration = 0;
+        LocalDateTime endTime = LocalDateTime.MIN;
+
+        for (Subtask subtask : subtasks) {
+            if (subtask.getStartTime().isBefore(startTime)) {
+                startTime = subtask.getStartTime();
+            }
+            duration += subtask.getDuration();
+            if (subtask.getEndTime().isAfter(endTime)) {
+                endTime = subtask.getEndTime();
+            }
+        }
+        if (startTime.isAfter(endTime)) {
+            endTime = startTime;
+        }
+        epic.setStartTime(startTime);
+        epic.setDuration(duration);
+        epic.setEndTime(endTime);
+    }
+
+    // проверка на пересечение во времени задач и подзадач с помощью множества
+    private boolean checkTimeCross(Task task) {
+        final List<Task> sortTasks = getPrioritizedTasks();
+        for (Task sortTask : sortTasks) {
+            if (sortTask.getId() == task.getId()) {
+                continue; // если обновляем задачу
+            }
+            if (((sortTask.getStartTime().isBefore(task.getEndTime())) ||
+                    (sortTask.getStartTime().isEqual(task.getEndTime()))) &&
+                    ((sortTask.getEndTime().isAfter(task.getStartTime())) ||
+                            (sortTask.getEndTime().isEqual(task.getStartTime())))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // проверка на пересечение во времени задач и подзадач с помощью дерева
+    private Boolean checkTimeCrossMap(Task task) {
+        if (task == null) {
+            return false;
+        }
+        LocalDateTime curTime = task.getStartTime();
+        while (true) {
+            if (curTime.isEqual(LocalDateTime.MAX)) {
+                return true;
+            }
+            if (curTime.isEqual(LocalDateTime.MAX.minusNanos(999999999))) {
+                return true;
+            }
+            int curId = busyTime.get(curTime);
+            if ((curId != 0) && (curId != task.getId())) {
+                return false;
+            }
+            curTime = curTime.plusMinutes(15);
+            if (curTime.isEqual(task.getEndTime())) {
+                break;
+            }
+        }
+        return true;
     }
 }

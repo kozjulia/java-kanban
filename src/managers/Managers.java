@@ -1,9 +1,9 @@
 package managers;
 
+import managers.taskmanagers.TaskManager;
+import managers.taskmanagers.InMemoryTaskManager;
 import managers.historymanagers.HistoryManager;
 import managers.historymanagers.InMemoryHistoryManager;
-import managers.taskmanagers.InMemoryTaskManager;
-import managers.taskmanagers.TaskManager;
 
 // утилитарный класс-менеджер
 public class Managers {

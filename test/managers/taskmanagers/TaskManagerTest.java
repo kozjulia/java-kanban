@@ -1,20 +1,20 @@
 package managers.taskmanagers;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import tasks.StatusTask;
 import tasks.Task;
-import tasks.Subtask;
 import tasks.Epic;
+import tasks.Subtask;
+import tasks.StatusTask;
+import managers.exception.SaveTaskException;
 
-import java.sql.SQLOutput;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
     // тесты для абстрактного класса TaskManagerTest которые одинаковы у всех классов-наследников
-
     public T taskManager;
     public static Task task1;
     public static Task task2;
@@ -23,7 +23,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public static Subtask subtask5;
     public static Subtask subtask6;
     public static Epic epic7;
-
 
     // устанавливаем тип менеджера в наследнике
     public abstract void setTaskManager();
@@ -85,7 +84,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void getWrongTask() {
         // тест получения задачи по несуществующему id
-        final int idTask = taskManager.createTask(task1);
+        taskManager.createTask(task1);
         Task getTask = taskManager.getTask(100);
 
         assertNull(getTask, "Задача найдена.");
@@ -94,7 +93,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void createTask() {
         // тест создания задачи
-        Task task = new Task("Test createNewTask", "Test createNewTask description");
+        Task task = new Task("Test createNewTask", "Test createNewTask description",
+                LocalDateTime.of(2023, 03, 19, 10, 00), 30);
         final int idTask = taskManager.createTask(task);
         final Task savedTask = taskManager.getTask(idTask);
         final List<Task> tasks = taskManager.getAllTask();
@@ -119,10 +119,32 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    public void createCrossTask() {
+        // тест создания пересекающейся во времени задачи
+        taskManager.createTask(task2);
+        taskManager.createEpic(epic3);
+        taskManager.createSubtask(subtask4);
+        Task crossTask = new Task("Cross task", "Cross task description",
+                LocalDateTime.of(2023, 03, 15, 9, 30), 45);
+
+        // после исполнения блока ошибка попадёт в переменную exception
+        final SaveTaskException exception = assertThrows(
+                // класс ошибки
+                SaveTaskException.class,
+                // создание и переопределение экземпляра класса Executable
+                () -> taskManager.createTask(crossTask));
+        assertEquals(String.format("Невозможно создать новую задачу %s из-за пересечения во времени",
+                crossTask), exception.getMessage());
+        assertEquals(2, taskManager.getPrioritizedTasks().size(),
+                "Размер списка сортированных задач неверен");
+    }
+
+    @Test
     public void updateTask() {
         // тест обновления задачи
-        final int idTask = taskManager.createTask(task1);
-        Task updateTask = new Task("Test updateTask", "Test updateTask description");
+        taskManager.createTask(task1);
+        Task updateTask = new Task("Test updateTask", "Test updateTask description",
+                LocalDateTime.of(2023, 03, 19, 10, 00), 30);
         updateTask.setId(task1.getId());
         taskManager.updateTask(updateTask);
         final List<Task> tasks = taskManager.getAllTask();
@@ -143,6 +165,28 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         assertTrue(tasks.isEmpty(), "Нулевая задача возвращается.");
         assertEquals(0, tasks.size(), "Неверное количество нулевых задач.");
+    }
+
+    @Test
+    public void updateCrossTask() {
+        // тест обновления пересекающейся во времени задачи
+        taskManager.createTask(task2);
+        taskManager.createEpic(epic3);
+        taskManager.createSubtask(subtask4);
+        Task crossTask = new Task("Cross task", "Cross task description",
+                LocalDateTime.of(2023, 03, 15, 9, 30), 45);
+        crossTask.setId(2);
+
+        // после исполнения блока ошибка попадёт в переменную exception
+        final SaveTaskException exception = assertThrows(
+                // класс ошибки
+                SaveTaskException.class,
+                // создание и переопределение экземпляра класса Executable
+                () -> taskManager.updateTask(crossTask));
+        assertEquals(String.format("Невозможно обновить задачу %s из-за пересечения во времени",
+                crossTask), exception.getMessage());
+        assertEquals(2, taskManager.getPrioritizedTasks().size(),
+                "Размер списка сортированных задач неверен");
     }
 
     @Test
@@ -228,7 +272,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void getWrongEpic() {
         // тест получения эпика по несуществующему id
-        final int idEpic = taskManager.createEpic(epic3);
+        taskManager.createEpic(epic3);
         Epic getEpic = taskManager.getEpic(100);
 
         assertNull(getEpic, "Эпик найден.");
@@ -250,13 +294,34 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    public void createEpicAndSubtask() {
+        // тест создания эпика и подзадачи для проверки правильности расчёта времени начала,
+        // окончания и продолжительности эпика
+        epic3 = new Epic("Test epic3", "Test epic3 description");
+        subtask4 = new Subtask("Test subtask4", "Test subtask4 description", epic3.getId(),
+                LocalDateTime.of(2023, 03, 16, 10, 00), 15);
+        subtask5 = new Subtask("Test subtask5", "Test subtask5 description", epic3.getId(),
+                LocalDateTime.of(2023, 03, 15, 12, 00), 30);
+        taskManager.createEpic(epic3);
+        taskManager.createSubtask(subtask4);
+        taskManager.createSubtask(subtask5);
+
+        assertEquals(subtask5.getStartTime(), epic3.getStartTime(),
+                "Дата начала действия эпика рассчитывается неправильно.");
+        assertEquals(45, epic3.getDuration(),
+                "Длительность эпика рассчитывается неправильно.");
+        assertEquals(subtask4.getEndTime(), epic3.getEndTime(),
+                "Дата окончания действия эпика рассчитывается неправильно.");
+    }
+
+    @Test
     public void createNullEpic() {
         // тест создания пустого эпика
         Epic epicNull = null;
         final int idEpic = taskManager.createEpic(epicNull);
         final List<Epic> epics = taskManager.getAllEpic();
 
-        assertEquals(0, idEpic, "Нулевый эпик создался");
+        assertEquals(0, idEpic, "Нулевой эпик создался");
         assertTrue(epics.isEmpty(), "Нулевые эпики возвращаются.");
         assertEquals(0, epics.size(), "Неверное количество нулевых эпиков.");
     }
@@ -387,16 +452,37 @@ abstract class TaskManagerTest<T extends TaskManager> {
         // тест создания подзадачи
         Epic epic = new Epic("Test Epic", "Test Epic description");
         final int idEpic = taskManager.createEpic(epic);
-        Subtask subtask = new Subtask("Test createNewSubtask", "Test createNewSubtask description", idEpic);
+        Subtask subtask = new Subtask("Test createNewSubtask", "Test createNewSubtask description",
+                idEpic, LocalDateTime.of(2023, 03, 19, 10, 00), 30);
         final int idSubtask = taskManager.createSubtask(subtask);
         final Subtask savedSubtask = taskManager.getSubtask(idSubtask);
         final List<Subtask> subtasks = taskManager.getAllSubtask();
 
-        assertNotNull(savedSubtask, "Подадача не найдена.");
+        assertNotNull(savedSubtask, "Подзадача не найдена.");
         assertEquals(subtask, savedSubtask, "Подзадачи не совпадают.");
         assertNotNull(subtasks, "Подзадачи не возвращаются.");
         assertEquals(1, subtasks.size(), "Неверное количество подзадач.");
         assertEquals(savedSubtask, subtasks.get(0), "Подзадачи не совпадают.");
+    }
+
+    @Test
+    public void createCrossSubtask() {
+        // тест создания пересекающейся во времени подзадачи
+        taskManager.createTask(task2);
+        taskManager.createEpic(epic3);
+        Subtask crossSubtask = new Subtask("Cross subtask", "Cross subtask description", 3,
+                LocalDateTime.of(2023, 03, 19, 9, 15), 60);
+
+        // после исполнения блока ошибка попадёт в переменную exception
+        final SaveTaskException exception = assertThrows(
+                // класс ошибки
+                SaveTaskException.class,
+                // создание и переопределение экземпляра класса Executable
+                () -> taskManager.createTask(crossSubtask));
+        assertEquals(String.format("Невозможно создать новую задачу %s из-за пересечения во времени",
+                crossSubtask), exception.getMessage());
+        assertEquals(1, taskManager.getPrioritizedTasks().size(),
+                "Размер списка сортированных задач неверен");
     }
 
     @Test
@@ -415,8 +501,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void updateSubtask() {
         // тест обновления подзадачи
         final int idEpic = taskManager.createEpic(epic3);
-        final int idSubtask = taskManager.createSubtask(subtask4);
-        Subtask updateSubtask = new Subtask("Test updateSubtask", "Test updateSubtask description", idEpic);
+        taskManager.createSubtask(subtask4);
+        Subtask updateSubtask = new Subtask("Test updateSubtask", "Test updateSubtask description",
+                idEpic, LocalDateTime.of(2023, 03, 19, 10, 00), 30);
         updateSubtask.setId(subtask4.getId());
         taskManager.updateSubtask(updateSubtask);
         final List<Subtask> subtasks = taskManager.getAllSubtask();
@@ -437,6 +524,30 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         assertTrue(subtasks.isEmpty(), "Нулевая подзадача возвращается.");
         assertEquals(0, subtasks.size(), "Неверное количество нулевых подзадач.");
+    }
+
+    @Test
+    public void updateCrossSubtask() {
+        // тест обновления пересекающейся во времени подзадачи
+        taskManager.createTask(task2);
+        taskManager.createEpic(epic3);
+        taskManager.createSubtask(subtask4);
+        taskManager.createSubtask(subtask5);
+        taskManager.createSubtask(subtask6);
+        Subtask crossSubtask = new Subtask("Cross subtask", "Cross subtask description", 3,
+                LocalDateTime.of(2023, 03, 15, 10, 15), 120);
+        crossSubtask.setId(4);
+
+        // после исполнения блока ошибка попадёт в переменную exception
+        final SaveTaskException exception = assertThrows(
+                // класс ошибки
+                SaveTaskException.class,
+                // создание и переопределение экземпляра класса Executable
+                () -> taskManager.updateSubtask(crossSubtask));
+        assertEquals(String.format("Невозможно обновить подзадачу %s из-за пересечения во времени",
+                crossSubtask), exception.getMessage());
+        assertEquals(4, taskManager.getPrioritizedTasks().size(),
+                "Размер списка сортированных задач неверен");
     }
 
     @Test
@@ -476,13 +587,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(StatusTask.IN_PROGRESS, task1.getStatusTask(),
                 "Не обновился статус задачи");
     }
+
     @Test
     public void updateStatusNullTask() {
         // обновление статуса нулевой задачи
         Task task = null;
         taskManager.updateStatusTask(task, StatusTask.IN_PROGRESS);
 
-        assertNull(task,"У нулевой задачи статус доступен");
+        assertNull(task, "У нулевой задачи статус доступен");
     }
 
 
@@ -519,7 +631,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = null;
         taskManager.updateStatusEpic(epic);
 
-        assertNull(epic,"У нулевого эпика статус доступен");
+        assertNull(epic, "У нулевого эпика статус доступен");
     }
 
     @Test
@@ -534,12 +646,31 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(StatusTask.IN_PROGRESS, epic3.getStatusTask(),
                 "Не обновился статус эпика");
     }
+
     @Test
     public void updateStatusNullSubtask() {
         // обновление статуса нулевой подзадачи
         Subtask subtask = null;
         taskManager.updateStatusSubtask(subtask, StatusTask.IN_PROGRESS);
 
-        assertNull(subtask,"У нулевой задачи статус доступен");
+        assertNull(subtask, "У нулевой задачи статус доступен");
+    }
+
+    @Test
+    public void getPrioritizedTasks() {
+        // тест получения отсортированного по startTime задач и подзадач
+        taskManager.createTask(task1);
+        taskManager.createTask(task2);
+        taskManager.createEpic(epic3);
+        taskManager.createSubtask(subtask4);
+        taskManager.createSubtask(subtask5);
+        final List<Task> sortList = taskManager.getPrioritizedTasks();
+
+        assertNotNull(sortList, "Список сортировки не создан");
+        assertEquals(4, sortList.size(), "Размер списка сортировки не верен");
+        assertEquals(subtask4, sortList.get(0), "Сортировка некорректна");
+        assertEquals(subtask5, sortList.get(1), "Сортировка некорректна");
+        assertEquals(task2, sortList.get(2), "Сортировка некорректна");
+        assertEquals(task1, sortList.get(3), "Сортировка некорректна");
     }
 }

@@ -1,8 +1,7 @@
 package managers.exception;
 
-public class ManagerSaveException extends RuntimeException { // собственное непроверяемое исключение
-    public ManagerSaveException() {
-    }
+// собственное непроверяемое исключение для сохранения и открытия файла
+public class ManagerSaveException extends RuntimeException {
 
     public ManagerSaveException(final String message) {
         super(message);

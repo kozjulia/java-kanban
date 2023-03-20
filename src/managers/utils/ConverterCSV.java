@@ -1,17 +1,21 @@
 package managers.utils;
 
-import managers.historymanagers.HistoryManager;
-import tasks.Epic;
-import tasks.StatusTask;
-import tasks.Subtask;
 import tasks.Task;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.StatusTask;
+import managers.historymanagers.HistoryManager;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.ArrayList;
 
 public class ConverterCSV {
     public ConverterCSV() {
     }
+
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     public static String toString(Task task) { // метод сохранения задачи в строку
         return task.toString();
@@ -35,7 +39,7 @@ public class ConverterCSV {
     }
 
     private static Task fillTask(String[] params) { // создать задачу из параметров файла
-        // params = [id,type,name,status,description,epic]
+        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         if (params == null) {
             return null;
         }
@@ -44,12 +48,14 @@ public class ConverterCSV {
         task.setTitle(params[2]);
         task.setStatusTask(fillStatusFromString(params[3]));
         task.setDescription(params[4]);
+        task.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
+        task.setDuration(Integer.parseInt(params[7]));
         checkNextId(task);
         return task;
     }
 
     private static Subtask fillSubTask(String[] params) { // создать подзадачу из параметров файла
-        // params = [id,type,name,status,description,epic]
+        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         if (params == null) {
             return null;
         }
@@ -59,12 +65,14 @@ public class ConverterCSV {
         subtask.setStatusTask(fillStatusFromString(params[3]));
         subtask.setDescription(params[4]);
         subtask.setIdEpic(Integer.parseInt(params[5]));
+        subtask.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
+        subtask.setDuration(Integer.parseInt(params[7]));
         checkNextId(subtask);
         return subtask;
     }
 
     private static Epic fillEpic(String[] params) { // создать эпик из параметров файла
-        // params = [id,type,name,status,description,epic]
+        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         if (params == null) {
             return null;
         }
@@ -73,6 +81,9 @@ public class ConverterCSV {
         epic.setTitle(params[2]);
         epic.setStatusTask(fillStatusFromString(params[3]));
         epic.setDescription(params[4]);
+        epic.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
+        epic.setDuration(Integer.parseInt(params[7]));
+        epic.setEndTime(LocalDateTime.parse(params[8], FORMATTER));
         checkNextId(epic);
         return epic;
     }
@@ -100,13 +111,15 @@ public class ConverterCSV {
     // метод восстановления менеджера истории из CSV
     public static List<Integer> historyFromString(String value) {
         List<Integer> idHistoryList = new ArrayList<>();
-        if (value == null) {return idHistoryList;}
+        if (value == null) {
+            return idHistoryList;
+        }
         String[] idHistory = value.split(",");
-        for (int i = 0; i < idHistory.length; i++) {
-            if (idHistory[i].isEmpty() || idHistory[i].isBlank() || idHistory[i] == null ) {
+        for (String s : idHistory) {
+            if (s.isEmpty() || s.isBlank() || s == null) {
                 continue;
             }
-            idHistoryList.add(Integer.parseInt(idHistory[i]));
+            idHistoryList.add(Integer.parseInt(s));
         }
         return idHistoryList;
     }

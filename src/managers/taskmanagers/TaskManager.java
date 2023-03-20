@@ -1,9 +1,9 @@
 package managers.taskmanagers;
 
-import tasks.Epic;
-import tasks.StatusTask;
-import tasks.Subtask;
 import tasks.Task;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.StatusTask;
 
 import java.util.List;
 
@@ -56,6 +56,8 @@ public interface TaskManager {
     void updateStatusSubtask(Subtask subtask, StatusTask status);
 
     List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
 }
 
 

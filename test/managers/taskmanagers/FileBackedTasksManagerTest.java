@@ -1,28 +1,27 @@
 package managers.taskmanagers;
 
-import managers.exception.ManagerSaveException;
-import org.junit.jupiter.api.Test;
-import tasks.Epic;
-import tasks.StatusTask;
-import tasks.Subtask;
 import tasks.Task;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.StatusTask;
+import managers.exception.ManagerSaveException;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.jupiter.api.BeforeEach;
-
 class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
     // тесты для класса InMemoryTaskManagerTest
-    //private static TaskManager taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
-
     @Override
     public void setTaskManager() {
         taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
@@ -30,17 +29,21 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
 
     @BeforeEach
     // устанавливаем тип менеджера в наследнике
-    /////// Очень хотелось бы сделать это с аннотацией BeforeAll, но он статик
+    /////// Очень хотелось бы установить тип Таск Менеджера с аннотацией BeforeAll, но он статик
     /////// испробовала всё, что знаю, не получилось. Может подскажешь?
     public void beforeEach() {
         setTaskManager();
         Task.setNextId(0); // обновляем внутренний счётчик сквозной нумерации
-        task1 = new Task("Test task1", "Test task1 description");
-        task2 = new Task("Test task2", "Test task2 description");
+        task1 = new Task("Test task1", "Test task1 description", LocalDateTime.MAX, 15);
+        task2 = new Task("Test task2", "Test task2 description",
+                LocalDateTime.of(2023, 03, 19, 10, 00), 30);
         epic3 = new Epic("Test epic3", "Test epic3 description");
-        subtask4 = new Subtask("Test subtask4", "Test subtask4 description", epic3.getId());
-        subtask5 = new Subtask("Test subtask5", "Test subtask5 description", epic3.getId());
-        subtask6 = new Subtask("Test subtask6", "Test subtask6 description", epic3.getId());
+        subtask4 = new Subtask("Test subtask4", "Test subtask4 description", epic3.getId(),
+                LocalDateTime.of(2023, 03, 15, 10, 00), 15);
+        subtask5 = new Subtask("Test subtask5", "Test subtask5 description", epic3.getId(),
+                LocalDateTime.of(2023, 03, 15, 12, 00), 15);
+        subtask6 = new Subtask("Test subtask6", "Test subtask6 description", epic3.getId(),
+                LocalDateTime.of(2023, 03, 16, 11, 00), 45);
         epic7 = new Epic("Test epic7", "Test epic7 description");
     }
 
@@ -55,22 +58,22 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         // проверяю правильное построчное сохранение
         assertNotNull(linesFile, "Файл пуст");
         assertEquals(9, linesFile.size(), "Неверное количество строк в файле");
-        assertEquals("id,type,name,status,description,epic", linesFile.get(0),
-                "Неверно сохранена строка 0");
-        assertEquals("1,TASK,Test task1,NEW,Test task1 description,", linesFile.get(1),
-                "Неверно сохранена строка 1");
-        assertEquals("3,EPIC,Test epic3,IN_PROGRESS,Test epic3 description,", linesFile.get(2),
-                "Неверно сохранена строка 2");
-        assertEquals("7,EPIC,Test epic7,NEW,Test epic7 description,", linesFile.get(3),
-                "Неверно сохранена строка 3");
-        assertEquals("4,SUBTASK,Test subtask4,NEW,Test subtask4 description,3", linesFile.get(4),
-                "Неверно сохранена строка 4");
-        assertEquals("5,SUBTASK,Test subtask5,NEW,Test subtask5 description,3", linesFile.get(5),
-                "Неверно сохранена строка 5");
-        assertEquals("6,SUBTASK,Test subtask6,DONE,Test subtask6 description,3", linesFile.get(6),
-                "Неверно сохранена строка 6");
+        assertEquals("id,type,name,status,description,epic,startTime,duration,endTime",
+                linesFile.get(0), "Неверно сохранена строка 0");
+        assertEquals("1,TASK,Test task1,NEW,Test task1 description,,31.12.+999999999 23:59:59,15,",
+                linesFile.get(1), "Неверно сохранена строка 1");
+        assertEquals("3,EPIC,Test epic3,IN_PROGRESS,Test epic3 description,,15.03.2023 10:00:00,75," +
+                "16.03.2023 11:45:00", linesFile.get(2), "Неверно сохранена строка 2");
+        assertEquals("7,EPIC,Test epic7,NEW,Test epic7 description,,31.12.+999999999 23:59:59,0," +
+                "31.12.+999999999 23:59:59", linesFile.get(3), "Неверно сохранена строка 3");
+        assertEquals("4,SUBTASK,Test subtask4,NEW,Test subtask4 description,3,15.03.2023 10:00:00,15,",
+                linesFile.get(4), "Неверно сохранена строка 4");
+        assertEquals("5,SUBTASK,Test subtask5,NEW,Test subtask5 description,3,15.03.2023 12:00:00,15,",
+                linesFile.get(5), "Неверно сохранена строка 5");
+        assertEquals("6,SUBTASK,Test subtask6,DONE,Test subtask6 description,3,16.03.2023 11:00:00,45,",
+                linesFile.get(6), "Неверно сохранена строка 6");
         assertEquals("", linesFile.get(7), "Неверно сохранена строка 7");
-        assertEquals("3,6,1", linesFile.get(8), "Неверно сохранена строка 8");
+        assertEquals("6,1,3", linesFile.get(8), "Неверно сохранена строка 8");
     }
 
     private void loadTestData() {
@@ -93,8 +96,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     private List<String> getLinesFile() {
         // построчно получаю файл csv для тестирования
         final List<String> linesFile = new ArrayList<>();
-        try (BufferedReader fileReader = new BufferedReader(new FileReader(taskManager.file, StandardCharsets.UTF_8))) {
-            linesFile.add(fileReader.readLine()); // params = [id,type,name,status,description,epic]
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(
+                taskManager.file, StandardCharsets.UTF_8))) {
+            linesFile.add(fileReader.readLine());
+            // params = [id,type,name,status,description,epic,startTime,duration,endTime]
             while (fileReader.ready()) {
                 linesFile.add(fileReader.readLine());
             }
@@ -116,8 +121,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         // проверяю правильное построчное сохранение
         assertNotNull(linesFile, "Файл пуст");
         assertEquals(2, linesFile.size(), "Неверное количество строк в файле");
-        assertEquals("id,type,name,status,description,epic", linesFile.get(0),
-                "Неверно сохранена строка 0");
+        assertEquals("id,type,name,status,description,epic,startTime,duration,endTime",
+                linesFile.get(0), "Неверно сохранена строка 0");
         assertEquals("", linesFile.get(1), "Неверно сохранена строка 1");
     }
 
@@ -132,10 +137,10 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         // проверяю правильное построчное сохранение
         assertNotNull(linesFile, "Файл пуст");
         assertEquals(3, linesFile.size(), "Неверное количество строк в файле");
-        assertEquals("id,type,name,status,description,epic", linesFile.get(0),
-                "Неверно сохранена строка 0");
-        assertEquals("3,EPIC,Test epic3,NEW,Test epic3 description,", linesFile.get(1),
-                "Неверно сохранена строка 1");
+        assertEquals("id,type,name,status,description,epic,startTime,duration,endTime",
+                linesFile.get(0), "Неверно сохранена строка 0");
+        assertEquals("3,EPIC,Test epic3,NEW,Test epic3 description,,31.12.+999999999 23:59:59,0," +
+                "31.12.+999999999 23:59:59", linesFile.get(1), "Неверно сохранена строка 1");
         assertEquals("", linesFile.get(2), "Неверно сохранена строка 2");
     }
 
@@ -143,7 +148,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     public void loadFromFile() {
         // тест заполнения из csv-файла
         loadTestData();
-        taskManager.loadFromFile("resources" + File.separator + "data.csv");
+        FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
         final List<Task> listTasks = taskManager.getAllTask();
         final List<Epic> listEpics = taskManager.getAllEpic();
         final List<Subtask> listSubtasks = taskManager.getAllSubtask();
@@ -160,9 +165,9 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertTrue(listSubtasks.contains(subtask5), "Неверная подзадача");
         assertTrue(listSubtasks.contains(subtask6), "Неверная подзадача");
         assertEquals(3, listHistory.size(), "Неверная история");
-        assertEquals(epic3, listHistory.get(0), "Неверная история");
-        assertEquals(subtask6, listHistory.get(1), "Неверная история");
-        assertEquals(task1, listHistory.get(2), "Неверная история");
+        assertEquals(subtask6, listHistory.get(0), "Неверная история");
+        assertEquals(task1, listHistory.get(1), "Неверная история");
+        assertEquals(epic3, listHistory.get(2), "Неверная история");
     }
 
     @Test
@@ -170,7 +175,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         // тест заполнения из пустого csv-файла
         taskManager.createTask(task1);
         taskManager.deleteTask(1);
-        taskManager.loadFromFile("resources" + File.separator + "data.csv");
+        FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
         final List<Task> listTasks = taskManager.getAllTask();
         final List<Epic> listEpics = taskManager.getAllEpic();
         final List<Subtask> listSubtasks = taskManager.getAllSubtask();
@@ -187,7 +192,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
     public void loadFromFile1Epic() {
         // тест заполнения из csv-файла с 1 эпиком
         taskManager.createEpic(epic3);
-        taskManager.loadFromFile("resources" + File.separator + "data.csv");
+        FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
         final List<Task> listTasks = taskManager.getAllTask();
         final List<Epic> listEpics = taskManager.getAllEpic();
         final List<Subtask> listSubtasks = taskManager.getAllSubtask();
