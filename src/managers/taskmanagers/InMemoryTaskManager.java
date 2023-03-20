@@ -64,9 +64,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllTask() { // удаление всех задач
         for (Integer id : mapTask.keySet()) {
-            historyManager.remove(id);
             sortSetTask.remove(getTask(id));
             fillBusyTime(getTask(id).getStartTime(), getTask(id).getEndTime(), 0);
+            historyManager.remove(id);
         }
         mapTask.clear();
     }
@@ -197,9 +197,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllSubtask() { // удаление всех задач
         for (Integer id : mapSubtask.keySet()) {
-            historyManager.remove(id);
             sortSetTask.remove(getSubtask(id));
             fillBusyTime(getSubtask(id).getStartTime(), getSubtask(id).getEndTime(), 0);
+            historyManager.remove(id);
         }
         mapSubtask.clear();
         for (Epic epic : mapEpic.values()) {
