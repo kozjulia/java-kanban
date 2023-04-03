@@ -343,7 +343,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // обновление дат, времени начала и окончания эпика, его продолжительности
-    public void updateTimesDurationEpic(Epic epic) {
+    private void updateTimesDurationEpic(Epic epic) {
         final List<Subtask> subtasks = getListSubtaskByEpic(epic);
         LocalDateTime startTime = LocalDateTime.MAX;
         int duration = 0;
