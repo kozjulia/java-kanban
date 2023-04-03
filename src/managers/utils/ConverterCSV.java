@@ -35,7 +35,6 @@ public class ConverterCSV {
     }
 
     private static Task fillTask(String[] params) { // создать задачу из параметров файла
-        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         if (params == null) {
             return null;
         }
@@ -45,14 +44,12 @@ public class ConverterCSV {
         task.setStatusTask(fillStatusFromString(params[3]));
         task.setDescription(params[4]);
         task.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
-        //task.setStartTime(LocalDateTime.parse(params[6]));
         task.setDuration(Integer.parseInt(params[7]));
         checkNextId(task);
         return task;
     }
 
     private static Subtask fillSubTask(String[] params) { // создать подзадачу из параметров файла
-        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         if (params == null) {
             return null;
         }
@@ -63,14 +60,12 @@ public class ConverterCSV {
         subtask.setDescription(params[4]);
         subtask.setIdEpic(Integer.parseInt(params[5]));
         subtask.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
-        //subtask.setStartTime(LocalDateTime.parse(params[6]));
         subtask.setDuration(Integer.parseInt(params[7]));
         checkNextId(subtask);
         return subtask;
     }
 
     private static Epic fillEpic(String[] params) { // создать эпик из параметров файла
-        // params = [id,type,name,status,description,epic,startTime,duration,endTime]
         if (params == null) {
             return null;
         }
@@ -80,10 +75,8 @@ public class ConverterCSV {
         epic.setStatusTask(fillStatusFromString(params[3]));
         epic.setDescription(params[4]);
         epic.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
-        //epic.setStartTime(LocalDateTime.parse(params[6]));
         epic.setDuration(Integer.parseInt(params[7]));
         epic.setEndTime(LocalDateTime.parse(params[8], FORMATTER));
-        //epic.setEndTime(LocalDateTime.parse(params[8]));
         checkNextId(epic);
         return epic;
     }

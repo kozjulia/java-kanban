@@ -82,7 +82,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return 0;
         }
-        //if (!checkTimeCross(task)) { // проверка за O(n)
         if (!checkTimeCrossMap(task)) {
             throw new SaveTaskException(String.format(
                     "Невозможно создать новую задачу %s из-за пересечения во времени", task));
@@ -98,7 +97,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return;
         }
-        //if (!checkTimeCross(task)) { // проверка за O(n)
         if (!checkTimeCrossMap(task)) {
             throw new SaveTaskException(String.format(
                     "Невозможно обновить задачу %s из-за пересечения во времени", task));
@@ -218,7 +216,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtask == null) {
             return 0;
         }
-        //if (!checkTimeCross(subtask)) { // проверка за O(n)
         if (!checkTimeCrossMap(subtask)) {
             throw new SaveTaskException(String.format(
                     "Невозможно создать новую подзадачу %s из-за пересечения во времени", subtask));
@@ -236,7 +233,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtask == null) {
             return;
         }
-        //if (!checkTimeCross(subtask)) { // проверка за O(n)
         if (!checkTimeCrossMap(subtask)) {
             throw new SaveTaskException(String.format(
                     "Невозможно обновить подзадачу %s из-за пересечения во времени", subtask));

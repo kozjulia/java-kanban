@@ -27,12 +27,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         this.url = "http://localhost:";
     }
 
-    public HttpTaskManager(String url) {
-        super();
-        this.client = new KVTaskClient(url);
-        this.url = url;
-    }
-
     @Override
     protected void save() {
         Map<String, List<Task>> mapHttpTask = new HashMap<>();

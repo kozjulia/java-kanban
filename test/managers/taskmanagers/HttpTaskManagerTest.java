@@ -69,7 +69,8 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
                 .GET()
                 .build();
         final HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        Type userType = new TypeToken<Map<String, List<Task>>>() {}.getType();
+        Type userType = new TypeToken<Map<String, List<Task>>>() {
+        }.getType();
         Map<String, List<Task>> mapHttpTask = new HashMap<>(gson.fromJson(response.body(), userType));
         List<Task> tasks = new ArrayList<>(mapHttpTask.get("tasks"));
         List<Task> history = new ArrayList<>(mapHttpTask.get("history"));
@@ -130,13 +131,8 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
     @Test
     @DisplayName("тест заполнения с пустого сервера")
     public void loadFromEmpty() {
-        //////////// хочу ещё такую проверку делать, но тут исключение пишет, что не ловится
-        //////////// тест не проходит. Не знаю, как сделать, чтобы работало. Помоги пожалуйста
-        /*final IOException exception = assertThrows(
-                IOException.class,
-                () -> taskManager.client.load(key));
+        Map<String, List<Task>> mapTasks = new HashMap<>(taskManager.client.load(key));
 
-        assertEquals("Во время выполнения запроса возникла ошибка.\n" +
-                "Проверьте, пожалуйста, адрес и повторите попытку.", exception.getMessage());*/
+        assertEquals(0, mapTasks.size());
     }
 }
