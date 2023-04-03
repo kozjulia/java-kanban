@@ -320,6 +320,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // получение списка всех подзадач определённого эпика
+    @Override
     public List<Subtask> getListSubtaskByEpic(Epic epic) {
         List<Subtask> listSubtask = new ArrayList<>();
         for (Subtask subtask : mapSubtask.values()) {
@@ -342,7 +343,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     // обновление дат, времени начала и окончания эпика, его продолжительности
-    private void updateTimesDurationEpic(Epic epic) {
+    public void updateTimesDurationEpic(Epic epic) {
         final List<Subtask> subtasks = getListSubtaskByEpic(epic);
         LocalDateTime startTime = LocalDateTime.MAX;
         int duration = 0;

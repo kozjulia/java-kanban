@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class InMemoryHistoryManagerTest {
+public class InMemoryHistoryManagerTest {
     private static HistoryManager historyManager;
     private static Task task1;
     private static Task task2;

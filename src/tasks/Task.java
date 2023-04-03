@@ -2,7 +2,8 @@ package tasks;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
+import static managers.utils.LocalDateTimeAdapter.FORMATTER;
 
 // класс отдельно стоящей задачи, родитель tasks.Subtask и tasks.Epic
 public class Task {
@@ -16,10 +17,20 @@ public class Task {
     private int duration;
     // продолжительность задачи, оценка того, сколько времени она займёт в минутах (число)
 
-    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    //protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     public Task() {
         this.type = TypeTask.TASK;
+    }
+
+    public Task(String title, String description) {
+        this.id = generateId();
+        this.type = TypeTask.TASK;
+        this.title = title;
+        this.status = StatusTask.NEW;
+        this.description = description;
+        this.startTime = LocalDateTime.MAX;
+        this.duration = 0;
     }
 
     public Task(String title, String description, LocalDateTime startTime, int duration) {
@@ -102,6 +113,9 @@ public class Task {
 
     public LocalDateTime getEndTime() {
         // расчётное время завершения задачи
+        if (this.getStartTime() == null) {
+            return null;
+        }
         if (this.getStartTime().isEqual(LocalDateTime.MAX)) {
             return LocalDateTime.MAX;
         }
@@ -123,7 +137,9 @@ public class Task {
         if (!title.equals(task.title)) return false;
         if (status != task.status) return false;
         if (!description.equals(task.description)) return false;
-        if (!startTime.isEqual(task.startTime)) return false;
+        if ((!startTime.isEqual(task.startTime)) &&
+                (!startTime.minusNanos(999999999).isEqual(task.startTime)) &&
+                (!startTime.isEqual(task.startTime.minusNanos(999999999)))) return false;
         if (duration != task.duration) return false;
 
         return true;
@@ -141,6 +157,6 @@ public class Task {
     @Override
     public String toString() {
         return String.format("%d,%S,%s,%S,%s,,%s,%d,",
-                id, type, title, status, description, startTime.format(formatter), duration);
+                id, type, title, status, description, startTime.format(FORMATTER), duration);
     }
 }

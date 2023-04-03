@@ -1,21 +1,17 @@
 package managers.utils;
 
-import tasks.Task;
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.StatusTask;
+import tasks.*;
 import managers.historymanagers.HistoryManager;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ArrayList;
+
+import static managers.utils.LocalDateTimeAdapter.FORMATTER;
 
 public class ConverterCSV {
     public ConverterCSV() {
     }
-
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     public static String toString(Task task) { // метод сохранения задачи в строку
         return task.toString();
@@ -49,6 +45,7 @@ public class ConverterCSV {
         task.setStatusTask(fillStatusFromString(params[3]));
         task.setDescription(params[4]);
         task.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
+        //task.setStartTime(LocalDateTime.parse(params[6]));
         task.setDuration(Integer.parseInt(params[7]));
         checkNextId(task);
         return task;
@@ -66,6 +63,7 @@ public class ConverterCSV {
         subtask.setDescription(params[4]);
         subtask.setIdEpic(Integer.parseInt(params[5]));
         subtask.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
+        //subtask.setStartTime(LocalDateTime.parse(params[6]));
         subtask.setDuration(Integer.parseInt(params[7]));
         checkNextId(subtask);
         return subtask;
@@ -82,8 +80,10 @@ public class ConverterCSV {
         epic.setStatusTask(fillStatusFromString(params[3]));
         epic.setDescription(params[4]);
         epic.setStartTime(LocalDateTime.parse(params[6], FORMATTER));
+        //epic.setStartTime(LocalDateTime.parse(params[6]));
         epic.setDuration(Integer.parseInt(params[7]));
         epic.setEndTime(LocalDateTime.parse(params[8], FORMATTER));
+        //epic.setEndTime(LocalDateTime.parse(params[8]));
         checkNextId(epic);
         return epic;
     }
@@ -96,7 +96,7 @@ public class ConverterCSV {
     }
 
     // заполнение статуса задач из строки
-    private static StatusTask fillStatusFromString(String statusString) {
+    public static StatusTask fillStatusFromString(String statusString) {
         switch (statusString) {
             case "NEW":
                 return StatusTask.NEW;

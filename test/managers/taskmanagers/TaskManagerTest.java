@@ -14,7 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-abstract class TaskManagerTest<T extends TaskManager> {
+public abstract class TaskManagerTest<T extends TaskManager> {
 
     // тесты для абстрактного класса TaskManagerTest, которые одинаковы у всех классов-наследников
     protected T taskManager;

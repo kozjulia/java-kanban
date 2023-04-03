@@ -2,6 +2,8 @@ package tasks;
 
 import java.time.LocalDateTime;
 
+import static managers.utils.LocalDateTimeAdapter.FORMATTER;
+
 // подзадача, обязательно входит в эпик
 public class Subtask extends Task {
     private int idEpic; // id эпика для подзадачи
@@ -9,6 +11,12 @@ public class Subtask extends Task {
     public Subtask() {
         super();
         this.setType(TypeTask.SUBTASK);
+    }
+
+    public Subtask(String title, String description, int idEpic) {
+        super(title, description);
+        this.setType(TypeTask.SUBTASK);
+        this.idEpic = idEpic;
     }
 
     public Subtask(String title, String description, int idEpic, LocalDateTime startTime, int duration) {
@@ -30,6 +38,6 @@ public class Subtask extends Task {
         return String.format("%d,%S,%s,%S,%s,%d,%s,%d,",
                 super.getId(), super.getType(), super.getTitle(),
                 super.getStatusTask(), super.getDescription(), idEpic,
-                super.getStartTime().format(super.formatter), super.getDuration());
+                super.getStartTime().format(FORMATTER), super.getDuration());
     }
 }

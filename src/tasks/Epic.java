@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
 
+import static managers.utils.LocalDateTimeAdapter.FORMATTER;
+
 // эпик, состоит из подзадач
 public class Epic extends Task {
     private List<Integer> idSubtask = new ArrayList<>(); // id подзадач эпика
@@ -15,7 +17,7 @@ public class Epic extends Task {
     }
 
     public Epic(String title, String description) {
-        super(title, description, LocalDateTime.MAX, 0);
+        super(title, description);
         this.setType(TypeTask.EPIC);
         this.endTime = this.getStartTime();
     }
@@ -43,7 +45,7 @@ public class Epic extends Task {
         return String.format("%d,%S,%s,%S,%s,,%s,%d,%s",
                 super.getId(), super.getType(), super.getTitle(),
                 super.getStatusTask(), super.getDescription(),
-                super.getStartTime().format(super.formatter), super.getDuration(),
-                getEndTime().format(super.formatter));
+                super.getStartTime().format(FORMATTER), super.getDuration(),
+                getEndTime().format(FORMATTER));
     }
 }

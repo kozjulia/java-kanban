@@ -21,11 +21,11 @@ import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
+public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager> {
 
     @BeforeEach
     public void beforeEach() {
-        taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
+        taskManager = new FileBackedTasksManager();
         Task.setNextId(0); // обновляем внутренний счётчик сквозной нумерации
         task1 = new Task("Test task1", "Test task1 description", LocalDateTime.MAX, 15);
         task2 = new Task("Test task2", "Test task2 description",
@@ -54,8 +54,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
                 linesFile.get(0), "Неверно сохранена строка 0");
         assertEquals("1,TASK,Test task1,NEW,Test task1 description,,31.12.+999999999 23:59:59,15,",
                 linesFile.get(1), "Неверно сохранена строка 1");
-        assertEquals("3,EPIC,Test epic3,IN_PROGRESS,Test epic3 description,,15.03.2023 10:00:00,75," +
-                "16.03.2023 11:45:00", linesFile.get(2), "Неверно сохранена строка 2");
+        assertEquals("3,EPIC,Test epic3,IN_PROGRESS,Test epic3 description,," +
+                "15.03.2023 10:00:00,75,16.03.2023 11:45:00", linesFile.get(2), "Неверно сохранена строка 2");
         assertEquals("7,EPIC,Test epic7,NEW,Test epic7 description,,31.12.+999999999 23:59:59,0," +
                 "31.12.+999999999 23:59:59", linesFile.get(3), "Неверно сохранена строка 3");
         assertEquals("4,SUBTASK,Test subtask4,NEW,Test subtask4 description,3,15.03.2023 10:00:00,15,",
@@ -129,8 +129,8 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertEquals(3, linesFile.size(), "Неверное количество строк в файле");
         assertEquals("id,type,name,status,description,epic,startTime,duration,endTime",
                 linesFile.get(0), "Неверно сохранена строка 0");
-        assertEquals("3,EPIC,Test epic3,NEW,Test epic3 description,,31.12.+999999999 23:59:59,0," +
-                "31.12.+999999999 23:59:59", linesFile.get(1), "Неверно сохранена строка 1");
+        assertEquals("3,EPIC,Test epic3,NEW,Test epic3 description,,31.12.+999999999 23:59:59," +
+                "0,31.12.+999999999 23:59:59", linesFile.get(1), "Неверно сохранена строка 1");
         assertEquals("", linesFile.get(2), "Неверно сохранена строка 2");
     }
 

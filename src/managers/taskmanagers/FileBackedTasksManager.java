@@ -17,20 +17,25 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     // определение объекта для директории
     public final File file;
 
+    public FileBackedTasksManager() {
+        super();
+        this.file = new File("resources" + File.separator + "data.csv");
+    }
+
     public FileBackedTasksManager(String path) {
         super();
         this.file = new File(path);
     }
 
     public static void main(String[] args) {
-        TaskManager taskManager = new FileBackedTasksManager("resources" + File.separator + "data.csv");
+        TaskManager taskManager = new FileBackedTasksManager();
         testSprint(taskManager);  // тестовые данные для ФЗ 7-го спринта
 
-        TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile("resources" + File.separator + "data.csv");
+        TaskManager taskManagerNew = FileBackedTasksManager.loadFromFile();
         testSprintNew(taskManagerNew);  // тестовые данные для ФЗ 7-го спринта загрузка из файла
     }
 
-    private static void printAllTasks(TaskManager taskManager) {
+    public static void printAllTasks(TaskManager taskManager) {
         System.out.println("\nСписок задач:");
         for (Task task : taskManager.getAllTask()) {
             System.out.println(task);
@@ -43,7 +48,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private static void printHistory(TaskManager taskManager) {
+    public static void printHistory(TaskManager taskManager) {
         System.out.println("\nИстория просмотра: ");
         if (taskManager.getHistory() == null) {
             return;
@@ -53,20 +58,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private static void printSortSet(TaskManager taskManager) {
+    public static void printSortSet(TaskManager taskManager) {
         System.out.println("\nСортированный список задач и подзадач:");
         for (Task task : taskManager.getPrioritizedTasks()) {
             System.out.println(task);
         }
     }
 
-    private static void testSprint(TaskManager taskManager) {
+    public static void testSprint(TaskManager taskManager) {
         taskManager.createTask(new Task("Покормить животных", "вкусным кормом",
                 LocalDateTime.MAX, 0));
         taskManager.createTask(new Task("Поиграть", "в настольные игры",
                 LocalDateTime.of(2023, 03, 19, 10, 00), 30));
-        int idEpic;
-        idEpic = taskManager.createEpic(new Epic("Сделать покупки", "продукты"));
+        int idEpic = taskManager.createEpic(new Epic("Сделать покупки", "продукты"));
         taskManager.createSubtask(new Subtask("Яблоки", "красные", idEpic,
                 LocalDateTime.of(2023, 03, 15, 10, 00), 15));
         taskManager.createSubtask(new Subtask("Творог", "200 гр.", idEpic,
@@ -79,7 +83,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         taskManager.getTask(2);
         taskManager.getTask(1);
         taskManager.updateStatusSubtask(taskManager.getSubtask(6), StatusTask.DONE);
-        taskManager.deleteTask(2);
+        //taskManager.deleteTask(2);
         try {
             taskManager.createTask(new Task("Не сохранится", "из-за пересечения",
                     LocalDateTime.of(2023, 03, 15, 10, 15), 20));
@@ -91,7 +95,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         printSortSet(taskManager);
     }
 
-    private static void testSprintNew(TaskManager taskManagerNew) {
+    protected static void testSprintNew(TaskManager taskManagerNew) {
         printAllTasks(taskManagerNew);
         printHistory(taskManagerNew);
         printSortSet(taskManagerNew);
@@ -197,7 +201,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     // методы для работы с файлом
-    private void save() { // сохраняет текущее состояние менеджера в указанный файл
+    protected void save() { // сохраняет текущее состояние менеджера в указанный файл
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
             fileWriter.append("id,type,name,status,description,epic,startTime,duration,endTime\n");
             for (Task task : super.getAllTask()) {
@@ -214,6 +218,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения файла");
         }
+    }
+
+    public static FileBackedTasksManager loadFromFile() {
+        FileBackedTasksManager taskManager = new FileBackedTasksManager();
+        taskManager.fillFromFile();
+
+        return taskManager;
     }
 
     public static FileBackedTasksManager loadFromFile(String path) {
